@@ -11,6 +11,8 @@ type (
 		Environment map[string]interface{} `json:"environment"`
 		Session     map[string]interface{} `json:"session"`
 		Framework   string                 `json:"framework"`
+		Key         string                 `json:"key"`
+		ProjectId   string                 `json:"project_id"`
 	}
 
 	ErrorReportNotifier struct {

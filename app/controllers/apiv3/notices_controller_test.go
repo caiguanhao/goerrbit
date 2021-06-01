@@ -41,12 +41,13 @@ func TestCreateNotice(t *testing.T) {
 	defer f.Close()
 	req := httptest.NewRequest("POST", "/", f)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Authorization", "Bearer "+apiKey)
 	rec := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, rec)
 	c.SetPath("/api/v3/projects/:id/notices")
 	c.SetParamNames("id")
-	c.SetParamValues(apiKey)
+	c.SetParamValues("1")
 	ctx := shared.Ctx{Context: c, CtxModels: cm}
 	var ctrl noticesCtrl
 	err = ctrl.create(ctx)

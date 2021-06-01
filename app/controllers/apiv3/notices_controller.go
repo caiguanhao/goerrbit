@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"goerrbit/app/models"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,19 +20,27 @@ func (c noticesCtrl) init(g *echo.Group) {
 }
 
 func (_ noticesCtrl) create(c echo.Context) error {
-	// find app
-	a := c.(Ctx).ModelApp
-	var app models.App
-	err := a.Find("WHERE api_key = $1", c.Param("id")).Query(&app)
-	if err == a.Connection().ErrNoRows() {
-		return c.String(422, "Your API key is unknown")
-	} else if err != nil {
-		return err
-	}
-
 	// create error report from request json
 	var report models.ErrorReport
 	if err := c.Bind(&report); err != nil {
+		return err
+	}
+
+	apiKey := report.Key
+	if token := c.Request().Header.Get("X-Airbrake-Token"); token != "" {
+		apiKey = token
+	}
+	if auth := strings.TrimPrefix(c.Request().Header.Get("Authorization"), "Bearer "); auth != "" {
+		apiKey = auth
+	}
+
+	// find app
+	a := c.(Ctx).ModelApp
+	var app models.App
+	err := a.Find("WHERE api_key = $1", apiKey).Query(&app)
+	if err == a.Connection().ErrNoRows() {
+		return c.String(422, "Your API key is unknown")
+	} else if err != nil {
 		return err
 	}
 
