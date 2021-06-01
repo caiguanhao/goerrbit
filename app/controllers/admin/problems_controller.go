@@ -21,7 +21,7 @@ func (c problemsCtrl) init(g *echo.Group) {
 func (ctrl problemsCtrl) list(c echo.Context) error {
 	app := ctrl.findApp(c)
 	problems := []models.Problem{}
-	c.(Ctx).ModelProblem.Find("WHERE app_id = $1", app.Id).MustQuery(&problems)
+	c.(Ctx).ModelProblem.Find("WHERE app_id = $1 ORDER BY last_notice_at DESC", app.Id).MustQuery(&problems)
 	return c.JSON(200, struct {
 		Problems []models.Problem
 	}{problems})

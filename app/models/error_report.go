@@ -1,6 +1,8 @@
 package models
 
-import "net/url"
+import (
+	"net/url"
+)
 
 type (
 	ErrorReport struct {
@@ -54,12 +56,20 @@ func (r ErrorReport) userAttributes() map[string]interface{} {
 			"user": user,
 		}
 	}
-	return map[string]interface{}{
-		"id":       r.Context["userId"],
-		"name":     r.Context["userName"],
-		"email":    r.Context["userEmail"],
-		"username": r.Context["userUsername"],
+	attrs := map[string]interface{}{}
+	if v, ok := r.Context["userId"]; ok {
+		attrs["id"] = v
 	}
+	if v, ok := r.Context["userName"]; ok {
+		attrs["name"] = v
+	}
+	if v, ok := r.Context["userEmail"]; ok {
+		attrs["email"] = v
+	}
+	if v, ok := r.Context["userUsername"]; ok {
+		attrs["username"] = v
+	}
+	return attrs
 }
 
 func (e ErrorReportError) backtraces() (b []Backtrace) {
