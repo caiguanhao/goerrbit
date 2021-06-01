@@ -76,6 +76,7 @@ func (_ noticesCtrl) create(c echo.Context) error {
 			"ErrorClass":   notice.ErrorClass,
 			"Environment":  notice.EnvironmentName(),
 			"LastNoticeAt": notice.CreatedAt,
+			"LastNoticeId": notice.Id,
 			"Message":      notice.Message,
 			"ResolvedAt":   nil,
 			"Location":     notice.Location(),

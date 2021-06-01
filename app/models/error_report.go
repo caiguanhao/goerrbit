@@ -45,6 +45,9 @@ func (r ErrorReport) hostname() string {
 
 func (r ErrorReport) userAttributes() map[string]interface{} {
 	if user, ok := r.Context["user"]; ok {
+		if u, ok := user.(map[string]interface{}); ok {
+			return u
+		}
 		return map[string]interface{}{
 			"user": user,
 		}

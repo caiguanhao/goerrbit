@@ -2,6 +2,7 @@ package admin
 
 import (
 	"goerrbit/app/models"
+	"goerrbit/app/serializers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,8 +32,8 @@ func (ctrl problemsCtrl) show(c echo.Context) error {
 	var problem models.Problem
 	c.(Ctx).ModelProblem.Find("WHERE app_id = $1 AND id = $2", app.Id, c.Param("id")).MustQuery(&problem)
 	return c.JSON(200, struct {
-		Problem models.Problem
-	}{problem})
+		Problem serializers.AdminProblem
+	}{serializers.NewAdminProblem(problem)})
 }
 
 func (_ problemsCtrl) findApp(c echo.Context) (app models.App) {
