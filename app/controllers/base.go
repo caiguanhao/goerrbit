@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"goerrbit/app/controllers/admin"
 	"goerrbit/app/controllers/apiv3"
 	"goerrbit/app/controllers/shared"
 
@@ -53,6 +54,7 @@ func New(conn db.DB, log logger.Logger) *echo.Echo {
 
 		e.DefaultHTTPErrorHandler(err, c)
 	}
+	admin.Mount(e.Group("/api/admin"))
 	apiv3.Mount(e.Group("/api/v3"))
 	return e
 }
