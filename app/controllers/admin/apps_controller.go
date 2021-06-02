@@ -43,18 +43,17 @@ func (_ appsCtrl) list(c echo.Context) error {
 	return c.JSON(200, res)
 }
 
-func (_ appsCtrl) show(c echo.Context) error {
+func (ctrl appsCtrl) show(c echo.Context) error {
 	var app models.App
 	c.(Ctx).ModelApp.Find("WHERE id = $1", c.Param("id")).MustQuery(&app)
-	a := serializers.NewAdminAppDetails(app)
-	a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1", app.Id)
-	return c.JSON(200, struct {
-		App serializers.AdminAppDetails
-	}{a})
+	return ctrl.detailsApp(c, app)
 }
 
 func (ctrl appsCtrl) create(c echo.Context) error {
 	var app models.App
+	if c.Request().ContentLength == 0 {
+		return ctrl.detailsApp(c, app)
+	}
 	var id int
 	m := c.(Ctx).ModelApp
 	changes := m.MustAssign(
@@ -66,7 +65,7 @@ func (ctrl appsCtrl) create(c echo.Context) error {
 	c.(Ctx).MustValidate(app)
 	m.Insert(changes...)("RETURNING id").MustQueryRow(&id)
 	m.Find("WHERE id = $1", id).MustQuery(&app)
-	return c.JSON(200, struct{ App models.App }{app})
+	return ctrl.detailsApp(c, app)
 }
 
 func (ctrl appsCtrl) update(c echo.Context) error {
@@ -81,11 +80,21 @@ func (ctrl appsCtrl) update(c echo.Context) error {
 	c.(Ctx).MustValidate(app)
 	m.Update(changes...)("WHERE id = $1", id).MustExecute()
 	m.Find("WHERE id = $1", id).MustQuery(&app)
-	return c.JSON(200, struct{ App models.App }{app})
+	return ctrl.detailsApp(c, app)
 }
 
 func (appsCtrl) params() []string {
 	return []string{
 		"Name", "ApiKey", "Fingerprinter",
 	}
+}
+
+func (ctrl appsCtrl) detailsApp(c echo.Context, app models.App) error {
+	a := serializers.NewAdminAppDetails(app)
+	if app.Id > 0 {
+		a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1", app.Id)
+	}
+	return c.JSON(200, struct {
+		App serializers.AdminAppDetails
+	}{a})
 }
