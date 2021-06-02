@@ -27,3 +27,9 @@ func NewCtxModels(options ...interface{}) CtxModels {
 		ModelNotice:  psql.NewModel(models.Notice{}, options...),
 	}
 }
+
+func (c Ctx) MustValidate(i interface{}) {
+	if err := c.Validate(i); err != nil {
+		panic(err)
+	}
+}
