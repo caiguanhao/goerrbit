@@ -1,8 +1,10 @@
 package admin
 
 import (
+	"fmt"
 	"goerrbit/app/models"
 	"goerrbit/app/serializers"
+	"strings"
 
 	"github.com/gopsql/pagination"
 	"github.com/labstack/echo/v4"
@@ -15,34 +17,65 @@ func init() {
 }
 
 func (c problemsCtrl) init(g *echo.Group) {
+	g.GET("/problems", c.list)
 	g.GET("/apps/:app_id/problems", c.list)
 	g.GET("/apps/:app_id/problems/:id", c.show)
 }
 
 func (ctrl problemsCtrl) list(c echo.Context) error {
-	app := ctrl.findApp(c)
 	q := pagination.Query{
 		MaxPer:     50,
 		DefaultPer: 20,
 	}
 	c.Bind(&q)
-	cond := "WHERE app_id = $1"
+
+	var includeApps bool
+	var cond []string
+	var args []interface{}
+	if c.Param("app_id") == "" {
+		includeApps = true
+	} else {
+		app := ctrl.findApp(c)
+		cond = append(cond, "app_id = $?")
+		args = append(args, app.Id)
+	}
 	qt, qa := q.GetQuery()
 	if qt != "" {
-		cond += " AND (message ILIKE $2 OR error_class ILIKE $2 OR location ILIKE $2)"
+		cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
+		args = append(args, qa...)
 	}
-	count := c.(Ctx).ModelProblem.MustCount(append([]interface{}{cond, app.Id}, qa...)...)
+
+	var sql string
+	if len(cond) > 0 {
+		for i := range cond {
+			cond[i] = strings.Replace(cond[i], "$?", fmt.Sprintf("$%d", i+1), -1)
+		}
+		sql = "WHERE " + strings.Join(cond, " AND ")
+	}
+
+	count := c.(Ctx).ModelProblem.MustCount(append([]interface{}{sql}, args...)...)
 	problems := []models.Problem{}
-	sql := cond + " ORDER BY last_notice_at DESC " + q.LimitOffset()
-	c.(Ctx).ModelProblem.Find(append([]interface{}{sql, app.Id}, qa...)...).MustQuery(&problems)
+	sql = sql + " ORDER BY last_notice_at DESC " + q.LimitOffset()
+	c.(Ctx).ModelProblem.Find(append([]interface{}{sql}, args...)...).MustQuery(&problems)
 	p := []serializers.AdminProblem{}
+	appIds := []int{}
 	for _, problem := range problems {
 		p = append(p, serializers.NewAdminProblem(problem))
+		appIds = appendIfMissing(appIds, problem.AppId)
+	}
+	a := []serializers.AdminAppSimple{}
+	if includeApps && len(appIds) > 0 {
+		var apps []models.App
+		c.(Ctx).ModelApp.Find("WHERE id = ANY($1)", appIds).MustQuery(&apps)
+		for _, app := range apps {
+			a = append(a, serializers.NewAdminAppSimple(app))
+		}
 	}
 	return c.JSON(200, struct {
 		Problems   []serializers.AdminProblem
+		Apps       []serializers.AdminAppSimple
 		Pagination pagination.Result
-	}{p, q.Result(count)})
+	}{p, a, q.Result(count)})
 }
 
 func (ctrl problemsCtrl) show(c echo.Context) error {
@@ -57,4 +90,13 @@ func (ctrl problemsCtrl) show(c echo.Context) error {
 func (_ problemsCtrl) findApp(c echo.Context) (app models.App) {
 	c.(Ctx).ModelApp.Find("WHERE id = $1", c.Param("app_id")).MustQuery(&app)
 	return
+}
+
+func appendIfMissing(slice []int, s int) []int {
+	for _, ele := range slice {
+		if ele == s {
+			return slice
+		}
+	}
+	return append(slice, s)
 }

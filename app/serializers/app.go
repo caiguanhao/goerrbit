@@ -6,9 +6,13 @@ import (
 )
 
 type (
+	AdminAppSimple struct {
+		Id   int
+		Name string
+	}
+
 	AdminApp struct {
-		Id            int
-		Name          string
+		AdminAppSimple
 		ApiKey        string
 		ProblemsCount int
 		CreatedAt     time.Time
@@ -22,13 +26,19 @@ type (
 	}
 )
 
+func NewAdminAppSimple(app models.App) AdminAppSimple {
+	return AdminAppSimple{
+		Id:   app.Id,
+		Name: app.Name,
+	}
+}
+
 func NewAdminApp(app models.App) AdminApp {
 	return AdminApp{
-		Id:        app.Id,
-		Name:      app.Name,
-		ApiKey:    app.ApiKey,
-		CreatedAt: app.CreatedAt,
-		UpdatedAt: app.UpdatedAt,
+		AdminAppSimple: NewAdminAppSimple(app),
+		ApiKey:         app.ApiKey,
+		CreatedAt:      app.CreatedAt,
+		UpdatedAt:      app.UpdatedAt,
 	}
 }
 
