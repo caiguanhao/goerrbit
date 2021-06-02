@@ -46,10 +46,10 @@ func (_ appsCtrl) list(c echo.Context) error {
 func (_ appsCtrl) show(c echo.Context) error {
 	var app models.App
 	c.(Ctx).ModelApp.Find("WHERE id = $1", c.Param("id")).MustQuery(&app)
-	a := serializers.NewAdminApp(app)
+	a := serializers.NewAdminAppDetails(app)
 	a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1", app.Id)
 	return c.JSON(200, struct {
-		App serializers.AdminApp
+		App serializers.AdminAppDetails
 	}{a})
 }
 
@@ -86,6 +86,6 @@ func (ctrl appsCtrl) update(c echo.Context) error {
 
 func (appsCtrl) params() []string {
 	return []string{
-		"Name", "ApiKey",
+		"Name", "ApiKey", "Fingerprinter",
 	}
 }
