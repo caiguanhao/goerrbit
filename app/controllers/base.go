@@ -52,6 +52,7 @@ func New(conn db.DB, log logger.Logger) *echo.Echo {
 			return
 		}
 
+		log.Error("error:", err)
 		e.DefaultHTTPErrorHandler(err, c)
 	}
 	admin.Mount(e.Group("/api/admin"))
