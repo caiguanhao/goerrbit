@@ -10,7 +10,7 @@ type (
 	App struct {
 		Id            int
 		Name          string         `validate:"gt=0,lte=100"`
-		ApiKey        string         `validate:"required"`
+		ApiKey        string         `validate:"required,uniqueness"`
 		Fingerprinter *Fingerprinter `jsonb:"meta"`
 		CreatedAt     time.Time
 		UpdatedAt     time.Time

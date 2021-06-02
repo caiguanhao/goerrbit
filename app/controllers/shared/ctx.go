@@ -2,6 +2,7 @@ package shared
 
 import (
 	"goerrbit/app/models"
+	"reflect"
 
 	"github.com/gopsql/psql"
 	"github.com/labstack/echo/v4"
@@ -32,4 +33,23 @@ func (c Ctx) MustValidate(i interface{}) {
 	if err := c.Validate(i); err != nil {
 		panic(err)
 	}
+}
+
+// m.ModelByName("User") => m.ModelUser
+func (models CtxModels) ModelByName(name string) *psql.Model {
+	if name == "" {
+		return nil
+	}
+	rv := reflect.ValueOf(models)
+	f := rv.FieldByName(name)
+	if !f.IsValid() {
+		f = rv.FieldByName("Model" + name)
+	}
+	if !f.IsValid() {
+		return nil
+	}
+	if m, ok := f.Interface().(*psql.Model); ok {
+		return m
+	}
+	return nil
 }

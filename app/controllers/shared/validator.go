@@ -18,7 +18,29 @@ func (v *Validator) Validate(i interface{}) error {
 func NewValidator(ctxModels CtxModels) (v *Validator) {
 	validate := validator.New()
 	v = &Validator{ctxModels, validate}
+	validate.RegisterValidation("uniqueness", v.validateUniqueness)
 	return
+}
+
+func (v Validator) validateUniqueness(fl validator.FieldLevel) bool {
+	structName := fl.Top().Type().Name()
+	m := v.ctxModels.ModelByName(structName)
+	if m == nil {
+		return false
+	}
+	f := m.FieldByName(fl.StructFieldName())
+	if f == nil {
+		return false
+	}
+	var sql string
+	switch fl.Param() {
+	case "lower":
+		sql = "WHERE lower(" + f.ColumnName + ") = $1"
+	default:
+		sql = "WHERE " + f.ColumnName + " = $1"
+	}
+	exists := m.MustExists(sql, fl.Field().Interface())
+	return !exists
 }
 
 type (
