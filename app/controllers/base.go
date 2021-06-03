@@ -7,6 +7,7 @@ import (
 
 	"github.com/caiguanhao/goerrbit/app/controllers/admin"
 	"github.com/caiguanhao/goerrbit/app/controllers/apiv3"
+	"github.com/caiguanhao/goerrbit/app/controllers/apiv5"
 	"github.com/caiguanhao/goerrbit/app/controllers/shared"
 	"github.com/go-playground/validator/v10"
 	"github.com/gopsql/db"
@@ -60,6 +61,7 @@ func New(conn db.DB, log logger.Logger, static http.FileSystem) *echo.Echo {
 
 	admin.Mount(e.Group("/api/admin"))
 	apiv3.Mount(e.Group("/api/v3"))
+	apiv5.Mount(e.Group("/api/v5"))
 
 	if static != nil {
 		public := echo.WrapHandler(http.FileServer(static))
