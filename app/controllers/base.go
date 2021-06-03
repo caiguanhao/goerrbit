@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 
 	"github.com/caiguanhao/goerrbit/app/controllers/admin"
 	"github.com/caiguanhao/goerrbit/app/controllers/apiv3"
@@ -12,7 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func New(conn db.DB, log logger.Logger) *echo.Echo {
+func New(conn db.DB, log logger.Logger, static http.FileSystem) *echo.Echo {
 	ctxModels := shared.NewCtxModels(conn, log)
 
 	e := echo.New()
@@ -55,7 +57,22 @@ func New(conn db.DB, log logger.Logger) *echo.Echo {
 		log.Error("error:", err)
 		e.DefaultHTTPErrorHandler(err, c)
 	}
+
 	admin.Mount(e.Group("/api/admin"))
 	apiv3.Mount(e.Group("/api/v3"))
+
+	if static != nil {
+		public := echo.WrapHandler(http.FileServer(static))
+		e.GET("/*", func(c echo.Context) error {
+			req := c.Request()
+			resp := httptest.NewRecorder()
+			e := public(e.NewContext(req, resp))
+			if e != nil || resp.Code == 404 {
+				req.URL.Path = "/"
+			}
+			return public(c)
+		})
+	}
+
 	return e
 }

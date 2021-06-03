@@ -9,6 +9,7 @@ import (
 	"github.com/caiguanhao/goerrbit/app/controllers"
 	"github.com/caiguanhao/goerrbit/app/migrations"
 	"github.com/caiguanhao/goerrbit/app/models"
+	"github.com/caiguanhao/goerrbit/frontend"
 	"github.com/gopsql/logger"
 	"github.com/gopsql/migrator"
 	"github.com/gopsql/pgx"
@@ -63,7 +64,7 @@ func main() {
 		return
 	}
 
-	e := controllers.New(conn, log)
+	e := controllers.New(conn, log, frontend.FS)
 
 	if *toPrintRoutes {
 		data, _ := json.MarshalIndent(e.Routes(), "", "  ")

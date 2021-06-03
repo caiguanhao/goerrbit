@@ -1,6 +1,6 @@
 module github.com/caiguanhao/goerrbit
 
-go 1.15
+go 1.16
 
 require (
 	github.com/go-playground/validator/v10 v10.6.1
