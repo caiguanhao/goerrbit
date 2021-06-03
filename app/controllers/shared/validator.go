@@ -32,6 +32,10 @@ func (v Validator) validateUniqueness(fl validator.FieldLevel) bool {
 	if f == nil {
 		return false
 	}
+	var id int
+	if field := fl.Top().FieldByName("Id"); field.IsValid() {
+		id, _ = field.Interface().(int)
+	}
 	var sql string
 	switch fl.Param() {
 	case "lower":
@@ -39,8 +43,11 @@ func (v Validator) validateUniqueness(fl validator.FieldLevel) bool {
 	default:
 		sql = "WHERE " + f.ColumnName + " = $1"
 	}
-	exists := m.MustExists(sql, fl.Field().Interface())
-	return !exists
+	if id > 0 {
+		sql += " AND id != $2"
+		return !m.MustExists(sql, fl.Field().Interface(), id)
+	}
+	return !m.MustExists(sql, fl.Field().Interface())
 }
 
 type (

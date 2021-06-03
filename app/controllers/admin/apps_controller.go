@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/caiguanhao/goerrbit/app/models"
@@ -100,7 +101,7 @@ func (ctrl appsCtrl) create(c echo.Context) error {
 
 func (ctrl appsCtrl) update(c echo.Context) error {
 	var app models.App
-	id := c.Param("id")
+	app.Id, _ = strconv.Atoi(c.Param("id"))
 	m := c.(Ctx).ModelApp
 	changes := m.MustAssign(
 		&app,
@@ -108,8 +109,8 @@ func (ctrl appsCtrl) update(c echo.Context) error {
 		m.UpdatedAt(),
 	)
 	c.(Ctx).MustValidate(app)
-	m.Update(changes...)("WHERE id = $1", id).MustExecute()
-	m.Find("WHERE id = $1", id).MustQuery(&app)
+	m.Update(changes...)("WHERE id = $1", app.Id).MustExecute()
+	m.Find("WHERE id = $1", app.Id).MustQuery(&app)
 	return ctrl.detailsApp(c, app)
 }
 
