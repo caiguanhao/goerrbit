@@ -1,9 +1,12 @@
 package admin
 
 import (
+	"fmt"
 	"goerrbit/app/models"
 	"goerrbit/app/serializers"
+	"strings"
 
+	"github.com/gopsql/pagination"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,23 +24,50 @@ func (c appsCtrl) init(g *echo.Group) {
 }
 
 func (_ appsCtrl) list(c echo.Context) error {
+	q := pagination.Query{
+		MaxPer:     50,
+		DefaultPer: 20,
+	}
+	c.Bind(&q)
+
+	var cond []string
+	var args []interface{}
+	qt, qa := q.GetQuery()
+	if qt != "" {
+		cond = append(cond, "name ILIKE $?")
+		args = append(args, qa...)
+	}
+
+	var sql string
+	if len(cond) > 0 {
+		for i := range cond {
+			cond[i] = strings.Replace(cond[i], "$?", fmt.Sprintf("$%d", i+1), -1)
+		}
+		sql = "WHERE " + strings.Join(cond, " AND ")
+	}
+
+	count := c.(Ctx).ModelApp.MustCount(append([]interface{}{sql}, args...)...)
 	apps := []models.App{}
-	c.(Ctx).ModelApp.Find("ORDER BY created_at DESC").MustQuery(&apps)
+	sql = sql + " ORDER BY created_at DESC " + q.LimitOffset()
+	c.(Ctx).ModelApp.Find(append([]interface{}{sql}, args...)...).MustQuery(&apps)
 	var appIds []int
 	for _, app := range apps {
 		appIds = append(appIds, app.Id)
 	}
-	count := map[int]int{}
+	problemsCount := map[int]int{}
 	if len(appIds) > 0 {
 		c.(Ctx).ModelProblem.Select("app_id, COUNT(*)",
-			"WHERE app_id = ANY($1) AND resolved_at IS NULL GROUP BY app_id", appIds).MustQuery(&count)
+			"WHERE app_id = ANY($1) AND resolved_at IS NULL GROUP BY app_id", appIds).MustQuery(&problemsCount)
 	}
 	res := struct {
-		Apps []serializers.AdminApp
+		Apps       []serializers.AdminApp
+		Pagination pagination.Result
 	}{}
+	res.Apps = []serializers.AdminApp{}
+	res.Pagination = q.Result(count)
 	for _, app := range apps {
 		a := serializers.NewAdminApp(app)
-		a.ProblemsCount = count[a.Id]
+		a.ProblemsCount = problemsCount[a.Id]
 		res.Apps = append(res.Apps, a)
 	}
 	return c.JSON(200, res)
