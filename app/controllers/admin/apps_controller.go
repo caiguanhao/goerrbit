@@ -30,7 +30,7 @@ func (_ appsCtrl) list(c echo.Context) error {
 	count := map[int]int{}
 	if len(appIds) > 0 {
 		c.(Ctx).ModelProblem.Select("app_id, COUNT(*)",
-			"WHERE app_id = ANY($1) GROUP BY app_id", appIds).MustQuery(&count)
+			"WHERE app_id = ANY($1) AND resolved_at IS NULL GROUP BY app_id", appIds).MustQuery(&count)
 	}
 	res := struct {
 		Apps []serializers.AdminApp
@@ -92,7 +92,7 @@ func (appsCtrl) params() []string {
 func (ctrl appsCtrl) detailsApp(c echo.Context, app models.App) error {
 	a := serializers.NewAdminAppDetails(app)
 	if app.Id > 0 {
-		a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1", app.Id)
+		a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1 AND resolved_at IS NULL", app.Id)
 	}
 	return c.JSON(200, struct {
 		App serializers.AdminAppDetails

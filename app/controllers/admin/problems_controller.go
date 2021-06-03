@@ -5,6 +5,7 @@ import (
 	"goerrbit/app/models"
 	"goerrbit/app/serializers"
 	"strings"
+	"time"
 
 	"github.com/gopsql/pagination"
 	"github.com/labstack/echo/v4"
@@ -20,6 +21,7 @@ func (c problemsCtrl) init(g *echo.Group) {
 	g.GET("/problems", c.list)
 	g.GET("/apps/:app_id/problems", c.list)
 	g.GET("/apps/:app_id/problems/:id", c.show)
+	g.PUT("/apps/:app_id/problems/:id/resolve", c.resolve)
 }
 
 func (ctrl problemsCtrl) list(c echo.Context) error {
@@ -43,6 +45,11 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 	if qt != "" {
 		cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
 		args = append(args, qa...)
+	}
+	if c.QueryParam("status") == "resolved" {
+		cond = append(cond, "resolved_at IS NOT NULL")
+	} else {
+		cond = append(cond, "resolved_at IS NULL")
 	}
 
 	var sql string
@@ -85,6 +92,17 @@ func (ctrl problemsCtrl) show(c echo.Context) error {
 	return c.JSON(200, struct {
 		Problem serializers.AdminProblem
 	}{serializers.NewAdminProblem(problem)})
+}
+
+func (ctrl problemsCtrl) resolve(c echo.Context) error {
+	app := ctrl.findApp(c)
+	p := c.(Ctx).ModelProblem
+	p.Update(
+		p.Changes(map[string]interface{}{
+			"ResolvedAt": time.Now(),
+		}),
+	)("WHERE app_id = $1 AND id = $2", app.Id, c.Param("id")).MustExecute()
+	return ctrl.show(c)
 }
 
 func (_ problemsCtrl) findApp(c echo.Context) (app models.App) {
