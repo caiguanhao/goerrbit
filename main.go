@@ -41,7 +41,11 @@ func main() {
 		return
 	}
 
-	conn, err := pgx.Open("postgres://localhost:5432/goerrbit?sslmode=disable")
+	dbStr := os.Getenv("PGCONN")
+	if dbStr == "" {
+		dbStr = "postgres://localhost:5432/goerrbit?sslmode=disable"
+	}
+	conn, err := pgx.Open(dbStr)
 	if err != nil {
 		log.Fatal(err)
 	}
