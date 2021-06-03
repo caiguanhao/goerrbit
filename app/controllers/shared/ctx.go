@@ -1,9 +1,9 @@
 package shared
 
 import (
-	"goerrbit/app/models"
 	"reflect"
 
+	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/gopsql/psql"
 	"github.com/labstack/echo/v4"
 )

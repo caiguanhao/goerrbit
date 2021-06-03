@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"goerrbit/app/controllers/admin"
-	"goerrbit/app/controllers/apiv3"
-	"goerrbit/app/controllers/shared"
 
+	"github.com/caiguanhao/goerrbit/app/controllers/admin"
+	"github.com/caiguanhao/goerrbit/app/controllers/apiv3"
+	"github.com/caiguanhao/goerrbit/app/controllers/shared"
 	"github.com/go-playground/validator/v10"
 	"github.com/gopsql/db"
 	"github.com/gopsql/logger"

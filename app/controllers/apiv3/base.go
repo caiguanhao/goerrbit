@@ -1,8 +1,7 @@
 package apiv3
 
 import (
-	"goerrbit/app/controllers/shared"
-
+	"github.com/caiguanhao/goerrbit/app/controllers/shared"
 	"github.com/labstack/echo/v4"
 )
 

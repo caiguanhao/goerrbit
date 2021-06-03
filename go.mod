@@ -1,4 +1,4 @@
-module goerrbit
+module github.com/caiguanhao/goerrbit
 
 go 1.15
 

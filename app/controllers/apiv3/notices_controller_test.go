@@ -1,11 +1,11 @@
 package apiv3
 
 import (
-	"goerrbit/app/controllers/shared"
 	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/caiguanhao/goerrbit/app/controllers/shared"
 	"github.com/gopsql/logger"
 	"github.com/gopsql/pgx"
 	"github.com/labstack/echo/v4"

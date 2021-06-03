@@ -3,9 +3,9 @@ package apiv3
 import (
 	"crypto/md5"
 	"fmt"
-	"goerrbit/app/models"
 	"strings"
 
+	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/labstack/echo/v4"
 )
 

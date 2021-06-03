@@ -2,10 +2,10 @@ package admin
 
 import (
 	"fmt"
-	"goerrbit/app/models"
-	"goerrbit/app/serializers"
 	"strings"
 
+	"github.com/caiguanhao/goerrbit/app/models"
+	"github.com/caiguanhao/goerrbit/app/serializers"
 	"github.com/gopsql/pagination"
 	"github.com/labstack/echo/v4"
 )

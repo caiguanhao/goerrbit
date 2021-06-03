@@ -1,8 +1,9 @@
 package serializers
 
 import (
-	"goerrbit/app/models"
 	"time"
+
+	"github.com/caiguanhao/goerrbit/app/models"
 )
 
 type (
