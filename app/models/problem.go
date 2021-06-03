@@ -59,7 +59,7 @@ jsonb_set(
 CASE WHEN {column}->$2 IS NULL THEN jsonb_set({column}, ARRAY[$2], '{}') ELSE {column} END
 , ARRAY[$2, $3], jsonb_build_object('Count', 1, 'Value', $4::text))
 ELSE
-jsonb_set({column}, ARRAY[$2, $3, 'Count'], to_jsonb(({column}->$2->$3->'Count')::int + 1))
+jsonb_set({column}, ARRAY[$2, $3, 'Count'], to_jsonb(({column}->$2->$3->>'Count')::int + 1))
 END
 WHERE id = $1`
 	sql = strings.NewReplacer("{table}", table, "{column}", column).Replace(sql)
