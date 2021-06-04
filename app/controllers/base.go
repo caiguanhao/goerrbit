@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/caiguanhao/goerrbit/app/configs"
 	"github.com/caiguanhao/goerrbit/app/controllers/admin"
 	"github.com/caiguanhao/goerrbit/app/controllers/apiv3"
 	"github.com/caiguanhao/goerrbit/app/controllers/apiv5"
@@ -15,7 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func New(conn db.DB, log logger.Logger, static http.FileSystem) *echo.Echo {
+func New(conn db.DB, log logger.Logger, config *configs.Configs, static http.FileSystem) *echo.Echo {
 	ctxModels := shared.NewCtxModels(conn, log)
 
 	e := echo.New()
@@ -40,6 +41,7 @@ func New(conn db.DB, log logger.Logger, static http.FileSystem) *echo.Echo {
 			return next(shared.Ctx{
 				Context:   c,
 				CtxModels: ctxModels,
+				Configs:   config,
 			})
 		}
 	})

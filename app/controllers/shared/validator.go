@@ -51,11 +51,11 @@ func (v Validator) validateUniqueness(fl validator.FieldLevel) bool {
 }
 
 type (
-	ValidationError struct {
-		Errors []validationError
+	ValidationErrors struct {
+		Errors []ValidationError
 	}
 
-	validationError struct {
+	ValidationError struct {
 		FullName string
 		Name     string
 		Kind     string
@@ -64,10 +64,10 @@ type (
 	}
 )
 
-func PrettifyValidatorValidationErrors(err validator.ValidationErrors) ValidationError {
-	var errs []validationError
+func PrettifyValidatorValidationErrors(err validator.ValidationErrors) ValidationErrors {
+	var errs []ValidationError
 	for _, e := range err {
-		errs = append(errs, validationError{
+		errs = append(errs, ValidationError{
 			FullName: e.Namespace(),
 			Name:     e.Field(),
 			Kind:     e.Kind().String(),
@@ -75,5 +75,5 @@ func PrettifyValidatorValidationErrors(err validator.ValidationErrors) Validatio
 			Param:    e.Param(),
 		})
 	}
-	return ValidationError{errs}
+	return ValidationErrors{errs}
 }

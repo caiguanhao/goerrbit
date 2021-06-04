@@ -42,6 +42,7 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
@@ -94,8 +95,12 @@ github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
+github.com/gopsql/bcrypt v1.0.0 h1:EQd/8XI25ehP4whp4vlp52gKHEr9qudnkBlZHVHyvb0=
+github.com/gopsql/bcrypt v1.0.0/go.mod h1:PF90rnppzTLjUvUZ3alfDuN2Sili14t8Ik/T/nu0+QA=
 github.com/gopsql/db v1.0.0 h1:Mhlr+uvWjDt66YecjKs4yvMhSYiWgEk2PsWnJTtx+hk=
 github.com/gopsql/db v1.0.0/go.mod h1:plazrQDxoOfbv749q6AqZyR0wtPak19s4uw8J8pnMYA=
+github.com/gopsql/goconf v1.1.0 h1:/1xMtpjYumujdJVU4cHSTykN6OKuVj6auA3o4yY0tfg=
+github.com/gopsql/goconf v1.1.0/go.mod h1:jIS+fAazH4/pBw6q0x5eFw4g7VWjdRc4TjV570QrCx8=
 github.com/gopsql/logger v1.0.0 h1:21Sv0ut7G5Jl3tNOtYe5dfULZ6pnMbT/tDRDjYR3xC4=
 github.com/gopsql/logger v1.0.0/go.mod h1:GLePobhbDvK9bVbciLfapWQh0g52Ph7n1NfOCWK8zoc=
 github.com/gopsql/migrator v1.0.0 h1:cH36IHN0eyDgazhhi0DlfFOp5ncQyiRlNLkoAZE4yIc=
