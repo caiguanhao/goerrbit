@@ -9,7 +9,7 @@ import (
 type (
 	User struct {
 		Id        int
-		Name      string          `validate:"gt=0,lte=30"`
+		Name      string          `validate:"gt=0,lte=30,uniqueness=lower"`
 		Password  bcrypt.Password `validate:"required"`
 		IsAdmin   bool
 		CreatedAt time.Time

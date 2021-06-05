@@ -20,8 +20,8 @@ func init() {
 func (c appsCtrl) init(g *echo.Group) {
 	g.GET("/apps", c.list)
 	g.GET("/apps/:id", c.show)
-	g.POST("/apps", c.create)
-	g.PUT("/apps/:id", c.update)
+	g.POST("/apps", c.create, UserMustBeAdmin)
+	g.PUT("/apps/:id", c.update, UserMustBeAdmin)
 }
 
 func (_ appsCtrl) list(c echo.Context) error {

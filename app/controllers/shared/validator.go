@@ -1,6 +1,9 @@
 package shared
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -37,17 +40,20 @@ func (v Validator) validateUniqueness(fl validator.FieldLevel) bool {
 		id, _ = field.Interface().(int)
 	}
 	var sql string
+	var value interface{}
 	switch fl.Param() {
 	case "lower":
 		sql = "WHERE lower(" + f.ColumnName + ") = $1"
+		value = strings.ToLower(fmt.Sprint(fl.Field().Interface()))
 	default:
 		sql = "WHERE " + f.ColumnName + " = $1"
+		value = fl.Field().Interface()
 	}
 	if id > 0 {
 		sql += " AND id != $2"
-		return !m.MustExists(sql, fl.Field().Interface(), id)
+		return !m.MustExists(sql, value, id)
 	}
-	return !m.MustExists(sql, fl.Field().Interface())
+	return !m.MustExists(sql, value)
 }
 
 type (

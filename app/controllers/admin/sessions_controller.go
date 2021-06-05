@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"strings"
+
 	"github.com/caiguanhao/goerrbit/app/controllers/shared"
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/labstack/echo/v4"
@@ -24,7 +26,7 @@ func (_ sessionsCtrl) signIn(c echo.Context) error {
 	c.Bind(&req)
 	c.(Ctx).MustValidate(req)
 	var user models.User
-	err := c.(Ctx).ModelUser.Find("WHERE name = $1", req.Name).Query(&user)
+	err := c.(Ctx).ModelUser.Find("WHERE lower(name) = $1", strings.ToLower(req.Name)).Query(&user)
 	if err != nil || !user.Password.Equal(req.Password) {
 		return c.JSON(401, shared.ValidationErrors{
 			Errors: []shared.ValidationError{{
@@ -32,6 +34,17 @@ func (_ sessionsCtrl) signIn(c echo.Context) error {
 				Name:     "Password",
 				Kind:     "string",
 				Type:     "wrong",
+				Param:    "",
+			}},
+		})
+	}
+	if user.DeletedAt != nil {
+		return c.JSON(401, shared.ValidationErrors{
+			Errors: []shared.ValidationError{{
+				FullName: "Name",
+				Name:     "Name",
+				Kind:     "string",
+				Type:     "deleted",
 				Param:    "",
 			}},
 		})

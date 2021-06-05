@@ -39,3 +39,15 @@ func Mount(g *echo.Group) {
 	}
 	g.GET("/*", echo.NotFoundHandler)
 }
+
+func UserMustBeAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) (err error) {
+		user := c.(Ctx).CurrentUser()
+		if user == nil || !user.IsAdmin {
+			return c.JSON(403, struct {
+				Message string
+			}{"User is not an admin"})
+		}
+		return next(c)
+	}
+}
