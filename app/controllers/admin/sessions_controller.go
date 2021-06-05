@@ -8,17 +8,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type sessionsCtrl baseCtrl
+type signInCtrl baseCtrl
+type signOutCtrl baseCtrl
 
 func init() {
-	controllersWithoutAuth = append(controllersWithoutAuth, sessionsCtrl{})
+	controllersWithoutAuth = append(controllersWithoutAuth, signInCtrl{})
+	controllers = append(controllers, signOutCtrl{})
 }
 
-func (ctrl sessionsCtrl) init(g *echo.Group) {
+func (ctrl signInCtrl) init(g *echo.Group) {
 	g.POST("/sign-in", ctrl.signIn)
 }
 
-func (_ sessionsCtrl) signIn(c echo.Context) error {
+func (ctrl signOutCtrl) init(g *echo.Group) {
+	g.POST("/sign-out", ctrl.signOut)
+}
+
+func (_ signInCtrl) signIn(c echo.Context) error {
 	var req struct {
 		Name     string `validate:"gt=0,lte=30"`
 		Password string `validate:"gte=6,lte=72"`
@@ -52,4 +58,10 @@ func (_ sessionsCtrl) signIn(c echo.Context) error {
 	return c.JSON(200, struct {
 		Token string
 	}{c.(Ctx).NewSession(user.Id)})
+}
+
+func (_ signOutCtrl) signOut(c echo.Context) error {
+	userId, sessionId, _ := c.(Ctx).GetUserAndSessionId()
+	c.(Ctx).ModelUserSession.Delete("WHERE user_id = $1 AND session_id = $2", userId, sessionId).MustExecute()
+	return c.NoContent(204)
 }

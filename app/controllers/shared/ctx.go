@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/caiguanhao/goerrbit/app/configs"
@@ -69,29 +70,45 @@ func (c Ctx) NewSession(userId int) string {
 	return "Bearer " + auth
 }
 
+func (c Ctx) GetUserAndSessionId() (userId int, sessionId string, ok bool) {
+	auth := c.Request().Header.Get("authorization")
+	parts := strings.SplitN(auth, " ", 2)
+	if parts[0] != "Bearer" {
+		return
+	}
+	claims, e := parseToken(c.Configs.SessionPrivateKey.PublicKey, parts[1])
+	if e != nil {
+		return
+	}
+	var uid, sid interface{}
+	uid, ok = claims["UserId"]
+	if !ok {
+		return
+	}
+	sid, ok = claims["SessionId"]
+	if !ok {
+		return
+	}
+	userId, e = strconv.Atoi(fmt.Sprint(uid))
+	if e != nil {
+		ok = false
+		return
+	}
+	sessionId = fmt.Sprint(sid)
+	ok = true
+	return
+}
+
 func (c Ctx) CurrentUser() *models.User {
 	if cu := c.Get("CurrentUser"); cu != nil {
 		return cu.(*models.User)
 	}
-	auth := c.Request().Header.Get("authorization")
-	parts := strings.SplitN(auth, " ", 2)
-	if parts[0] != "Bearer" {
-		return nil
-	}
-	claims, e := parseToken(c.Configs.SessionPrivateKey.PublicKey, parts[1])
-	if e != nil {
-		return nil
-	}
-	userId, ok := claims["UserId"]
-	if !ok {
-		return nil
-	}
-	sessionId, ok := claims["SessionId"]
+	userId, sessionId, ok := c.GetUserAndSessionId()
 	if !ok {
 		return nil
 	}
 	var user models.User
-	e = c.ModelUser.Find("WHERE deleted_at IS NULL AND id = $1", userId).Query(&user)
+	e := c.ModelUser.Find("WHERE deleted_at IS NULL AND id = $1", userId).Query(&user)
 	if e != nil {
 		return nil
 	}
