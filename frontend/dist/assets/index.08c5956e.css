@@ -688,20 +688,43 @@ main > .container {
 
 
 
-.resolved[data-v-0852d8da] {
+.resolved[data-v-5f6cf562] {
   opacity: 0.5;
 }
 
 
-.backtrace[data-v-3037d841] {
+.backtrace[data-v-5a431ee2] {
   width: 240px;
 }
 
 
 
 
-.nav-link[data-v-318dacca] {
+.nav-link[data-v-45f0da42] {
   transition: none;
+}
+
+
+
+
+
+form[data-v-47bb4bee] {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+form[data-v-47bb4bee] .invalid-feedback {
+  margin-bottom: 15px;
+}
+input[type="text"][data-v-47bb4bee]:not(.is-invalid) {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+input[type="password"][data-v-47bb4bee]:not(.is-invalid) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 h3[data-v-369a4d5c] {
