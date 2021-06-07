@@ -16,6 +16,10 @@ import (
 
 type (
 	Configs struct {
+		Prefix string `
+URL prefix for frontend pages.
+`
+
 		PostgresDatabaseConnectionURL string `
 Connect to PostgreSQL database using a URL like this:
 postgres://user:password@host:port/dbname?sslmode=disable
@@ -39,9 +43,7 @@ func ReadConfigs(file string) (conf *Configs, err error) {
 	content, err = ioutil.ReadFile(file)
 	if err != nil {
 		if os.IsNotExist(err) {
-			conf = &Configs{
-				PostgresDatabaseConnectionURL: "postgres://localhost:5432/goerrbit?sslmode=disable",
-			}
+			conf = &Configs{}
 		}
 		return
 	}
@@ -56,6 +58,12 @@ func ReadConfigs(file string) (conf *Configs, err error) {
 func WriteConfigs(file string, conf *Configs) (err error) {
 	if conf == nil {
 		return
+	}
+	if conf.Prefix == "" {
+		conf.Prefix = "https://www.example.com"
+	}
+	if conf.PostgresDatabaseConnectionURL == "" {
+		conf.PostgresDatabaseConnectionURL = "postgres://localhost:5432/goerrbit?sslmode=disable"
 	}
 	if conf.SessionPrivateKey.PrivateKey == nil {
 		var privatekey *rsa.PrivateKey

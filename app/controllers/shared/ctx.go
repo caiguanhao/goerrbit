@@ -23,21 +23,23 @@ type (
 	}
 
 	CtxModels struct {
-		ModelApp         *psql.Model
-		ModelProblem     *psql.Model
-		ModelNotice      *psql.Model
-		ModelUser        *psql.Model
-		ModelUserSession *psql.Model
+		ModelApp                 *psql.Model
+		ModelProblem             *psql.Model
+		ModelNotice              *psql.Model
+		ModelUser                *psql.Model
+		ModelUserSession         *psql.Model
+		ModelNotificationService *psql.Model
 	}
 )
 
 func NewCtxModels(options ...interface{}) CtxModels {
 	return CtxModels{
-		ModelApp:         psql.NewModel(models.App{}, options...),
-		ModelProblem:     psql.NewModel(models.Problem{}, options...),
-		ModelNotice:      psql.NewModel(models.Notice{}, options...),
-		ModelUser:        psql.NewModel(models.User{}, options...),
-		ModelUserSession: psql.NewModel(models.UserSession{}, options...),
+		ModelApp:                 psql.NewModel(models.App{}, options...),
+		ModelProblem:             psql.NewModel(models.Problem{}, options...),
+		ModelNotice:              psql.NewModel(models.Notice{}, options...),
+		ModelUser:                psql.NewModel(models.User{}, options...),
+		ModelUserSession:         psql.NewModel(models.UserSession{}, options...),
+		ModelNotificationService: psql.NewModel(models.NotificationService{}, options...),
 	}
 }
 

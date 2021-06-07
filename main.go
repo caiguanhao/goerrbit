@@ -14,10 +14,12 @@ import (
 	"github.com/caiguanhao/goerrbit/app/migrations"
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/caiguanhao/goerrbit/frontend"
+	"github.com/caiguanhao/goerrbit/plugins"
 	"github.com/gopsql/logger"
 	"github.com/gopsql/migrator"
 	"github.com/gopsql/pgx"
 	"github.com/gopsql/psql"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -42,7 +44,7 @@ func main() {
 		var err error
 		if os.Getenv("FROM_MODELS") == "1" {
 			path, err = migrator.CreateNewMigrationFromModels("app/migrations",
-				models.User{}, models.UserSession{})
+				models.NotificationService{})
 		} else {
 			path, err = migrator.CreateNewMigration("app/migrations")
 		}
@@ -91,7 +93,16 @@ func main() {
 		return
 	}
 
+	services := plugins.Load(plugins.Find("."))
+
 	e := controllers.New(conn, log, config, frontend.FS)
+
+	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("Services", services)
+			return next(c)
+		}
+	})
 
 	if *toPrintRoutes {
 		data, _ := json.MarshalIndent(e.Routes(), "", "  ")

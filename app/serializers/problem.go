@@ -1,6 +1,8 @@
 package serializers
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/caiguanhao/goerrbit/app/models"
@@ -31,6 +33,8 @@ type (
 		Value      string
 		Percentage string
 	}
+
+	Notification map[string]string
 )
 
 func NewAdminProblem(problem models.Problem) AdminProblem {
@@ -52,5 +56,22 @@ func NewAdminProblem(problem models.Problem) AdminProblem {
 		LastNoticeAt:  problem.LastNoticeAt,
 		FirstNoticeAt: problem.FirstNoticeAt,
 		ResolvedAt:    problem.ResolvedAt,
+	}
+}
+
+func NewNotification(app models.App, problem models.Problem, prefix string) Notification {
+	return Notification{
+		"Id":            strconv.Itoa(problem.Id),
+		"AppId":         strconv.Itoa(app.Id),
+		"AppName":       app.Name,
+		"Message":       problem.Message,
+		"ErrorClass":    problem.ErrorClass,
+		"Environment":   problem.Environment,
+		"Location":      problem.Location,
+		"Url":           fmt.Sprintf("%s/apps/%d/problems/%d", prefix, app.Id, problem.Id),
+		"NoticesCount":  strconv.Itoa(problem.NoticesCount),
+		"LastNoticeId":  strconv.Itoa(problem.LastNoticeId),
+		"LastNoticeAt":  problem.LastNoticeAt.Format(time.RFC3339),
+		"FirstNoticeAt": problem.FirstNoticeAt.Format(time.RFC3339),
 	}
 }
