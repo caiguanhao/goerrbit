@@ -668,6 +668,10 @@
 main > .container {
   padding-top: 80px;
 }
+::-webkit-input-placeholder,
+::placeholder {
+  color: #d8dde2 !important;
+}
 .clickable-row {
   cursor: pointer;
 }
@@ -693,11 +697,18 @@ main > .container {
 }
 
 
-.backtrace[data-v-5a431ee2] {
+.backtrace[data-v-9ea073a6] {
   width: 240px;
 }
 
 
+
+.disabled[data-v-70175d92] {
+  opacity: 0.7;
+}
+.value[data-v-70175d92] {
+  white-space: pre-wrap;
+}
 
 
 .nav-link[data-v-45f0da42] {

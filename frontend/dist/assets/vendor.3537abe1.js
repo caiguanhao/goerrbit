@@ -4974,12 +4974,109 @@ function setChecked(el, { value, oldValue }, vnode) {
     el.checked = looseEqual(value, getCheckboxValue(el, true));
   }
 }
+const vModelRadio = {
+  created(el, { value }, vnode) {
+    el.checked = looseEqual(value, vnode.props.value);
+    el._assign = getModelAssigner(vnode);
+    addEventListener$1(el, "change", () => {
+      el._assign(getValue(el));
+    });
+  },
+  beforeUpdate(el, { value, oldValue }, vnode) {
+    el._assign = getModelAssigner(vnode);
+    if (value !== oldValue) {
+      el.checked = looseEqual(value, vnode.props.value);
+    }
+  }
+};
+const vModelSelect = {
+  created(el, { value, modifiers: { number } }, vnode) {
+    const isSetModel = isSet(value);
+    addEventListener$1(el, "change", () => {
+      const selectedVal = Array.prototype.filter.call(el.options, (o) => o.selected).map((o) => number ? toNumber(getValue(o)) : getValue(o));
+      el._assign(el.multiple ? isSetModel ? new Set(selectedVal) : selectedVal : selectedVal[0]);
+    });
+    el._assign = getModelAssigner(vnode);
+  },
+  mounted(el, { value }) {
+    setSelected(el, value);
+  },
+  beforeUpdate(el, _binding, vnode) {
+    el._assign = getModelAssigner(vnode);
+  },
+  updated(el, { value }) {
+    setSelected(el, value);
+  }
+};
+function setSelected(el, value) {
+  const isMultiple = el.multiple;
+  if (isMultiple && !isArray$1(value) && !isSet(value)) {
+    return;
+  }
+  for (let i = 0, l = el.options.length; i < l; i++) {
+    const option = el.options[i];
+    const optionValue = getValue(option);
+    if (isMultiple) {
+      if (isArray$1(value)) {
+        option.selected = looseIndexOf(value, optionValue) > -1;
+      } else {
+        option.selected = value.has(optionValue);
+      }
+    } else {
+      if (looseEqual(getValue(option), value)) {
+        el.selectedIndex = i;
+        return;
+      }
+    }
+  }
+  if (!isMultiple) {
+    el.selectedIndex = -1;
+  }
+}
 function getValue(el) {
   return "_value" in el ? el._value : el.value;
 }
 function getCheckboxValue(el, checked) {
   const key = checked ? "_trueValue" : "_falseValue";
   return key in el ? el[key] : checked;
+}
+const vModelDynamic = {
+  created(el, binding, vnode) {
+    callModelHook(el, binding, vnode, null, "created");
+  },
+  mounted(el, binding, vnode) {
+    callModelHook(el, binding, vnode, null, "mounted");
+  },
+  beforeUpdate(el, binding, vnode, prevVNode) {
+    callModelHook(el, binding, vnode, prevVNode, "beforeUpdate");
+  },
+  updated(el, binding, vnode, prevVNode) {
+    callModelHook(el, binding, vnode, prevVNode, "updated");
+  }
+};
+function callModelHook(el, binding, vnode, prevVNode, hook) {
+  let modelToUse;
+  switch (el.tagName) {
+    case "SELECT":
+      modelToUse = vModelSelect;
+      break;
+    case "TEXTAREA":
+      modelToUse = vModelText;
+      break;
+    default:
+      switch (vnode.props && vnode.props.type) {
+        case "checkbox":
+          modelToUse = vModelCheckbox;
+          break;
+        case "radio":
+          modelToUse = vModelRadio;
+          break;
+        default:
+          modelToUse = vModelText;
+      }
+  }
+  const fn2 = modelToUse[hook];
+  fn2 && fn2(el, binding, vnode, prevVNode);
 }
 const systemModifiers = ["ctrl", "shift", "alt", "meta"];
 const modifierGuards = {
@@ -14611,4 +14708,4 @@ defineComponent({
     };
   }
 });
-export { faCheckCircle as A, faCheck as B, faTimes as C, faCrown as D, createApp as E, Fragment as F, FontAwesomeIcon as G, VueToastificationPlugin as V, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, createTextVNode as f, renderList as g, popScopeId as h, withDirectives as i, withScopeId as j, format as k, renderSlot as l, vModelCheckbox as m, createStaticVNode as n, openBlock as o, pushScopeId as p, createRouter as q, resolveComponent as r, createWebHistory as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, reactive as x, library as y, faThumbsUp as z };
+export { library as A, faThumbsUp as B, faCheckCircle as C, faCheck as D, faTimes as E, Fragment as F, faCrown as G, createApp as H, FontAwesomeIcon as I, Modal as M, VueToastificationPlugin as V, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, createTextVNode as f, renderList as g, popScopeId as h, withDirectives as i, withScopeId as j, format as k, renderSlot as l, vModelCheckbox as m, vModelDynamic as n, openBlock as o, pushScopeId as p, vModelSelect as q, resolveComponent as r, createStaticVNode as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, createRouter as x, createWebHistory as y, reactive as z };
