@@ -16,6 +16,8 @@ CREATE TABLE users (
 
 CREATE UNIQUE INDEX unique_user ON users USING btree (lower(name));
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE user_sessions (
 	id SERIAL PRIMARY KEY,
 	user_id bigint DEFAULT 0 NOT NULL,
