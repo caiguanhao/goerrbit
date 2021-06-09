@@ -56,9 +56,14 @@ func (_ appsCtrl) list(c echo.Context) error {
 		appIds = append(appIds, app.Id)
 	}
 	problemsCount := map[int]int{}
+	notificationServicesCount := map[int]map[string]int{}
 	if len(appIds) > 0 {
 		c.(Ctx).ModelProblem.Select("app_id, COUNT(*)",
 			"WHERE app_id = ANY($1) AND resolved_at IS NULL GROUP BY app_id", appIds).MustQuery(&problemsCount)
+		c.(Ctx).ModelNotificationService.Select("app_id, "+
+			"jsonb_build_object('Enabled', COUNT(*) FILTER(WHERE enabled IS TRUE), "+
+			"'Disabled', COUNT(*) FILTER(WHERE enabled IS FALSE))",
+			"WHERE app_id = ANY($1) GROUP BY app_id", appIds).MustQuery(&notificationServicesCount)
 	}
 	res := struct {
 		Apps       []serializers.AdminApp
@@ -69,6 +74,7 @@ func (_ appsCtrl) list(c echo.Context) error {
 	for _, app := range apps {
 		a := serializers.NewAdminApp(app)
 		a.ProblemsCount = problemsCount[a.Id]
+		a.NotificationServicesCount = notificationServicesCount[a.Id]
 		res.Apps = append(res.Apps, a)
 	}
 	return c.JSON(200, res)
@@ -124,6 +130,11 @@ func (ctrl appsCtrl) detailsApp(c echo.Context, app models.App) error {
 	a := serializers.NewAdminAppDetails(app)
 	if app.Id > 0 {
 		a.ProblemsCount = c.(Ctx).ModelProblem.MustCount("WHERE app_id = $1 AND resolved_at IS NULL", app.Id)
+		c.(Ctx).ModelNotificationService.Select(
+			"jsonb_build_object('Enabled', COUNT(*) FILTER(WHERE enabled IS TRUE), "+
+				"'Disabled', COUNT(*) FILTER(WHERE enabled IS FALSE))",
+			"WHERE app_id = $1", app.Id).MustQueryRow(&a.NotificationServicesCount)
+
 	}
 	return c.JSON(200, struct {
 		App serializers.AdminAppDetails

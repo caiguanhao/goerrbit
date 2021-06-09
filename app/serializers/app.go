@@ -14,10 +14,11 @@ type (
 
 	AdminApp struct {
 		AdminAppSimple
-		ApiKey        string
-		ProblemsCount int
-		CreatedAt     time.Time
-		UpdatedAt     time.Time
+		ApiKey                    string
+		ProblemsCount             int
+		NotificationServicesCount map[string]int
+		CreatedAt                 time.Time
+		UpdatedAt                 time.Time
 	}
 
 	AdminAppDetails struct {
