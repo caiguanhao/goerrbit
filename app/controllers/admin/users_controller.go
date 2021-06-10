@@ -8,7 +8,7 @@ import (
 
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/caiguanhao/goerrbit/app/serializers"
-	"github.com/gopsql/pagination"
+	"github.com/gopsql/pagination/v2"
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,18 +30,28 @@ func (ctrl usersCtrl) init(g *echo.Group) {
 }
 
 func (_ usersCtrl) list(c echo.Context) error {
-	q := pagination.Query{
-		MaxPer:     50,
-		DefaultPer: 20,
+	q := pagination.PaginationQuerySort{
+		pagination.Pagination{
+			MaxPer:     50,
+			DefaultPer: 20,
+		},
+		pagination.Query{},
+		pagination.Sort{
+			AllowedSorts: []string{
+				"name",
+				"created_at",
+			},
+			DefaultSort:  "created_at",
+			DefaultOrder: "desc",
+		},
 	}
 	c.Bind(&q)
 
 	var cond []string
 	var args []interface{}
-	qt, qa := q.GetQuery()
-	if qt != "" {
+	if pattern := q.GetLikePattern(); pattern != "" {
 		cond = append(cond, "name ILIKE $?")
-		args = append(args, qa...)
+		args = append(args, pattern)
 	}
 	if c.QueryParam("status") == "deleted" {
 		cond = append(cond, "deleted_at IS NOT NULL")
@@ -59,14 +69,14 @@ func (_ usersCtrl) list(c echo.Context) error {
 
 	count := c.(Ctx).ModelUser.MustCount(append([]interface{}{sql}, args...)...)
 	users := []models.User{}
-	sql = sql + " ORDER BY created_at DESC " + q.LimitOffset()
+	sql = sql + " " + q.OrderByLimitOffset()
 	c.(Ctx).ModelUser.Find(append([]interface{}{sql}, args...)...).MustQuery(&users)
 	res := struct {
 		Users      []serializers.AdminUser
-		Pagination pagination.Result
+		Pagination pagination.PaginationQuerySortResult
 	}{}
 	res.Users = []serializers.AdminUser{}
-	res.Pagination = q.Result(count)
+	res.Pagination = q.PaginationQuerySortResult(count)
 	for _, user := range users {
 		a := serializers.NewAdminUser(user)
 		res.Users = append(res.Users, a)

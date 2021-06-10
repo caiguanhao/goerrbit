@@ -7,7 +7,7 @@ import (
 
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/caiguanhao/goerrbit/app/serializers"
-	"github.com/gopsql/pagination"
+	"github.com/gopsql/pagination/v2"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,18 +25,27 @@ func (c appsCtrl) init(g *echo.Group) {
 }
 
 func (_ appsCtrl) list(c echo.Context) error {
-	q := pagination.Query{
-		MaxPer:     50,
-		DefaultPer: 20,
+	q := pagination.PaginationQuerySort{
+		pagination.Pagination{
+			MaxPer:     50,
+			DefaultPer: 20,
+		},
+		pagination.Query{},
+		pagination.Sort{
+			AllowedSorts: []string{
+				"name",
+			},
+			DefaultSort:  "name",
+			DefaultOrder: "asc",
+		},
 	}
 	c.Bind(&q)
 
 	var cond []string
 	var args []interface{}
-	qt, qa := q.GetQuery()
-	if qt != "" {
+	if pattern := q.GetLikePattern(); pattern != "" {
 		cond = append(cond, "name ILIKE $?")
-		args = append(args, qa...)
+		args = append(args, pattern)
 	}
 
 	var sql string
@@ -49,7 +58,7 @@ func (_ appsCtrl) list(c echo.Context) error {
 
 	count := c.(Ctx).ModelApp.MustCount(append([]interface{}{sql}, args...)...)
 	apps := []models.App{}
-	sql = sql + " ORDER BY created_at DESC " + q.LimitOffset()
+	sql = sql + " " + q.OrderByLimitOffset()
 	c.(Ctx).ModelApp.Find(append([]interface{}{sql}, args...)...).MustQuery(&apps)
 	var appIds []int
 	for _, app := range apps {
@@ -67,10 +76,10 @@ func (_ appsCtrl) list(c echo.Context) error {
 	}
 	res := struct {
 		Apps       []serializers.AdminApp
-		Pagination pagination.Result
+		Pagination pagination.PaginationQuerySortResult
 	}{}
 	res.Apps = []serializers.AdminApp{}
-	res.Pagination = q.Result(count)
+	res.Pagination = q.PaginationQuerySortResult(count)
 	for _, app := range apps {
 		a := serializers.NewAdminApp(app)
 		a.ProblemsCount = problemsCount[a.Id]

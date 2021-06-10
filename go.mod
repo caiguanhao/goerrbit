@@ -10,7 +10,7 @@ require (
 	github.com/gopsql/goconf v1.1.0
 	github.com/gopsql/logger v1.0.0
 	github.com/gopsql/migrator v1.0.0
-	github.com/gopsql/pagination v1.0.0
+	github.com/gopsql/pagination/v2 v2.0.1
 	github.com/gopsql/pgx v1.0.0
 	github.com/gopsql/psql v1.0.1
 	github.com/labstack/echo/v4 v4.3.0

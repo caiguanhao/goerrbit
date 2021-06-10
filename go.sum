@@ -107,6 +107,8 @@ github.com/gopsql/migrator v1.0.0 h1:cH36IHN0eyDgazhhi0DlfFOp5ncQyiRlNLkoAZE4yIc
 github.com/gopsql/migrator v1.0.0/go.mod h1:WiHTCOHCr8H2uuxBzcw4bmMNPOuxaU9WZ9PLE9T9BgM=
 github.com/gopsql/pagination v1.0.0 h1:BLq/XpB8zdhOxuvUuk/sx8y0vnUUanXSNbTDJpAScmw=
 github.com/gopsql/pagination v1.0.0/go.mod h1:9XJ4kQ7HiMbSmE4w23y9f/lWEVlMydTLYA6OMpCkeQQ=
+github.com/gopsql/pagination/v2 v2.0.1 h1:WOT0SaXm3SohmpnLOJe4cbpT9H8KR7KQr5jAO6OpjDg=
+github.com/gopsql/pagination/v2 v2.0.1/go.mod h1:enDfzE4JHiIEkvNHF5sL+xhujdYcLA+D3gEWMuCjICU=
 github.com/gopsql/pgx v1.0.0 h1:6ZzaFUpMAoe6CrsQ9KIzW0Qagu5lRV5KvJHSzJ22z6c=
 github.com/gopsql/pgx v1.0.0/go.mod h1:AUaFYD4QUGvEJE/dhq6eBW0nd8PMqbDbVddT+5i7Ifs=
 github.com/gopsql/psql v1.0.0/go.mod h1:EjJCKVNXuZO+uiaC1aO9XpRPJHI0ytLuepMRLe6Zmx0=

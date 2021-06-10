@@ -7,7 +7,7 @@ import (
 
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/caiguanhao/goerrbit/app/serializers"
-	"github.com/gopsql/pagination"
+	"github.com/gopsql/pagination/v2"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,9 +25,21 @@ func (c problemsCtrl) init(g *echo.Group) {
 }
 
 func (ctrl problemsCtrl) list(c echo.Context) error {
-	q := pagination.Query{
-		MaxPer:     50,
-		DefaultPer: 20,
+	q := pagination.PaginationQuerySort{
+		pagination.Pagination{
+			MaxPer:     50,
+			DefaultPer: 20,
+		},
+		pagination.Query{},
+		pagination.Sort{
+			AllowedSorts: []string{
+				"message",
+				"last_notice_at",
+				"notices_count",
+			},
+			DefaultSort:  "last_notice_at",
+			DefaultOrder: "desc",
+		},
 	}
 	c.Bind(&q)
 
@@ -41,10 +53,9 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 		cond = append(cond, "app_id = $?")
 		args = append(args, app.Id)
 	}
-	qt, qa := q.GetQuery()
-	if qt != "" {
+	if pattern := q.GetLikePattern(); pattern != "" {
 		cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
-		args = append(args, qa...)
+		args = append(args, pattern)
 	}
 	if env := c.QueryParam("environment"); env != "" {
 		cond = append(cond, "environment = $?")
@@ -66,7 +77,7 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 
 	count := c.(Ctx).ModelProblem.MustCount(append([]interface{}{sql}, args...)...)
 	problems := []models.Problem{}
-	sql = sql + " ORDER BY last_notice_at DESC " + q.LimitOffset()
+	sql = sql + " " + q.OrderByLimitOffset()
 	c.(Ctx).ModelProblem.Find(append([]interface{}{sql}, args...)...).MustQuery(&problems)
 	p := []serializers.AdminProblem{}
 	appIds := []int{}
@@ -85,8 +96,8 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 	return c.JSON(200, struct {
 		Problems   []serializers.AdminProblem
 		Apps       []serializers.AdminAppSimple
-		Pagination pagination.Result
-	}{p, a, q.Result(count)})
+		Pagination pagination.PaginationQuerySortResult
+	}{p, a, q.PaginationQuerySortResult(count)})
 }
 
 func (ctrl problemsCtrl) show(c echo.Context) error {
