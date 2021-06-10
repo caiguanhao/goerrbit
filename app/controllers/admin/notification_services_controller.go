@@ -139,18 +139,9 @@ func (ctrl nsCtrl) test(c echo.Context) error {
 	c.(Ctx).ModelProblem.Find("WHERE app_id = $1 ORDER BY last_notice_at DESC", app.Id).MustQuery(&problem)
 	var ns models.NotificationService
 	c.(Ctx).ModelNotificationService.Find("WHERE app_id = $1 AND name = $2", app.Id, req.Name).MustQuery(&ns)
-
 	notification := serializers.NewNotification(app, problem, c.(Ctx).Configs.Prefix)
 	service := c.Get("Services").(plugins.Plugins).FindByName(req.Name)
-
-	instance := reflect.New(reflect.TypeOf(service.New()))
-	mx := psql.NewModel(instance.Elem().Interface())
-	mx.MustAssign(
-		instance.Interface(),
-		mx.PermitAllExcept().Filter(ns.Options),
-	)
-	i := instance.Elem().Interface().(plugins.NotificationService)
-	err := i.CreateNotification(notification)
+	err := service.CreateNotification(ns.Options, notification)
 	if err != nil {
 		return c.JSON(500, struct {
 			Message string

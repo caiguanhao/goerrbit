@@ -2,10 +2,13 @@ package plugins
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"plugin"
 	"reflect"
+
+	"github.com/gopsql/psql"
 )
 
 type (
@@ -31,6 +34,17 @@ type (
 		CreateNotification(map[string]string) error
 	}
 )
+
+func (plugin Plugin) CreateNotification(options interface{}, notification map[string]string) error {
+	instance := reflect.New(reflect.TypeOf(plugin.New()))
+	m := psql.NewModel(instance.Elem().Interface())
+	m.MustAssign(
+		instance.Interface(),
+		m.PermitAllExcept().Filter(options),
+	)
+	i := instance.Elem().Interface().(NotificationService)
+	return i.CreateNotification(notification)
+}
 
 func (plugins Plugins) FindByName(name string) *Plugin {
 	for _, plugin := range plugins {
@@ -59,29 +73,29 @@ func (f pluginNewFunc) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fields)
 }
 
-func Open(path string) *Plugin {
+func Open(path string) (*Plugin, error) {
 	p, err := plugin.Open(path)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	name := getString(p, "Name")
 	if name == "" {
-		return nil
+		return nil, errors.New("Name was not found")
 	}
 	description := getString(p, "Description")
 	n, err := p.Lookup("New")
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	nFunc, ok := n.(func() interface{})
 	if !ok {
-		return nil
+		return nil, errors.New("New was not found")
 	}
 	return &Plugin{
 		Name:        name,
 		Description: description,
 		New:         nFunc,
-	}
+	}, nil
 }
 
 func Find(dir string) []string {
@@ -96,18 +110,6 @@ func Find(dir string) []string {
 		return nil
 	})
 	return files
-}
-
-func Load(paths []string) Plugins {
-	plugins := Plugins{}
-	for _, path := range paths {
-		p := Open(path)
-		if p == nil {
-			continue
-		}
-		plugins = append(plugins, p)
-	}
-	return plugins
 }
 
 func getString(p *plugin.Plugin, name string) string {

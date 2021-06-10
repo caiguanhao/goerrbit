@@ -4,8 +4,11 @@ import (
 	"crypto/md5"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/caiguanhao/goerrbit/app/models"
+	"github.com/caiguanhao/goerrbit/app/serializers"
+	"github.com/caiguanhao/goerrbit/plugins"
 	"github.com/labstack/echo/v4"
 )
 
@@ -60,6 +63,9 @@ func (_ noticesCtrl) create(c echo.Context) error {
 	p.Find("WHERE app_id = $1 AND fingerprint = $2", app.Id, fingerprint).MustQuery(&problem)
 	newNotice.ProblemId = problem.Id
 
+	problemWasResolved := problem.ResolvedAt != nil
+	shouldNotify := problemWasResolved || time.Now().Sub(problem.LastNoticeAt).Seconds() >= 30
+
 	// create notice
 	var id int
 	n := c.(Ctx).ModelNotice
@@ -97,6 +103,18 @@ func (_ noticesCtrl) create(c echo.Context) error {
 	p.NewSQLWithValues(sql, problem.Id, "user_agents", md5String(ua), ua).MustExecute()
 	p.NewSQLWithValues(sql, problem.Id, "messages", md5String(msg), msg).MustExecute()
 	p.NewSQLWithValues(sql, problem.Id, "hosts", md5String(host), host).MustExecute()
+
+	if shouldNotify {
+		p.Find("WHERE id = $1", problem.Id).MustQuery(&problem)
+		notification := serializers.NewNotification(app, problem, c.(Ctx).Configs.Prefix)
+		plugins := c.Get("Services").(plugins.Plugins)
+		var nss []models.NotificationService
+		c.(Ctx).ModelNotificationService.Find("WHERE app_id = $1 AND enabled = true", app.Id).MustQuery(&nss)
+		for _, ns := range nss {
+			plugin := plugins.FindByName(ns.Name)
+			plugin.CreateNotification(ns.Options, notification)
+		}
+	}
 
 	return c.JSON(201, struct {
 		Id int `json:"id"`

@@ -93,7 +93,17 @@ func main() {
 		return
 	}
 
-	services := plugins.Load(plugins.Find("."))
+	soFiles := plugins.Find(".")
+	services := plugins.Plugins{}
+	for _, path := range soFiles {
+		p, err := plugins.Open(path)
+		if err != nil {
+			log.Error("error opening plugin", path)
+			continue
+		}
+		log.Info("opened", path)
+		services = append(services, p)
+	}
 
 	e := controllers.New(conn, log, config, frontend.FS)
 
