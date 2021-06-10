@@ -46,6 +46,10 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 		cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
 		args = append(args, qa...)
 	}
+	if env := c.QueryParam("environment"); env != "" {
+		cond = append(cond, "environment = $?")
+		args = append(args, env)
+	}
 	if c.QueryParam("status") == "resolved" {
 		cond = append(cond, "resolved_at IS NOT NULL")
 	} else {
