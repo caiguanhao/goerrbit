@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	github.com/caiguanhao/goerrbit v0.0.0-00010101000000-000000000000
-	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-00010101000000-000000000000
+	github.com/caiguanhao/goerrbit v1.1.1-0.20210611130256-dfc338853743
+	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-20210611130256-dfc338853743
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/gopsql/bcrypt v1.0.0
