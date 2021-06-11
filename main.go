@@ -22,6 +22,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var (
+	services plugins.Plugins
+)
+
 func main() {
 	defaultConfigFile := ".goerrbit.go"
 	if home, _ := os.UserHomeDir(); home != "" {
@@ -94,7 +98,6 @@ func main() {
 	}
 
 	soFiles := plugins.Find(".")
-	services := plugins.Plugins{}
 	for _, path := range soFiles {
 		p, err := plugins.Open(path)
 		if err != nil {
