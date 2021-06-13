@@ -5,7 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/caiguanhao/goerrbit/app/configs"
 	"github.com/caiguanhao/goerrbit/app/controllers/shared"
+	"github.com/caiguanhao/goerrbit/plugins"
 	"github.com/gopsql/logger"
 	"github.com/gopsql/pgx"
 	"github.com/labstack/echo/v4"
@@ -48,7 +50,8 @@ func TestCreateNotice(t *testing.T) {
 	c.SetPath("/api/v3/projects/:id/notices")
 	c.SetParamNames("id")
 	c.SetParamValues("1")
-	ctx := shared.Ctx{Context: c, CtxModels: cm}
+	c.Set("Services", plugins.Plugins{})
+	ctx := shared.Ctx{Context: c, CtxModels: cm, Configs: &configs.Configs{}}
 	var ctrl noticesCtrl
 	err = ctrl.create(ctx)
 	if err != nil {
