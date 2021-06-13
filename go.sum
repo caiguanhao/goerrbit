@@ -68,7 +68,6 @@ github.com/go-playground/locales v0.13.0 h1:HyWk6mgj5qFqCT5fjGBuRArbVDfE4hi8+e8c
 github.com/go-playground/locales v0.13.0/go.mod h1:taPMhCMXrRLJO55olJkUXHZBHCxTMfnGwq/HNwmWNS8=
 github.com/go-playground/universal-translator v0.17.0 h1:icxd5fm+REJzpZx7ZfpaD876Lmtgy7VtROAbHHXk8no=
 github.com/go-playground/universal-translator v0.17.0/go.mod h1:UkSxE5sNxxRwHyU+Scu5vgOQjsIJAF8j9muTVoKLVtA=
-github.com/go-playground/validator v9.31.0+incompatible h1:UA72EPEogEnq76ehGdEDp4Mit+3FDh548oRqwVgNsHA=
 github.com/go-playground/validator/v10 v10.6.1 h1:W6TRDXt4WcWp4c4nf/G+6BkGdhiIo0k417gfr+V6u4I=
 github.com/go-playground/validator/v10 v10.6.1/go.mod h1:xm76BBt941f7yWdGnI2DVPFFg1UK3YY04qifoXU3lOk=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
@@ -105,8 +104,6 @@ github.com/gopsql/logger v1.0.0 h1:21Sv0ut7G5Jl3tNOtYe5dfULZ6pnMbT/tDRDjYR3xC4=
 github.com/gopsql/logger v1.0.0/go.mod h1:GLePobhbDvK9bVbciLfapWQh0g52Ph7n1NfOCWK8zoc=
 github.com/gopsql/migrator v1.0.0 h1:cH36IHN0eyDgazhhi0DlfFOp5ncQyiRlNLkoAZE4yIc=
 github.com/gopsql/migrator v1.0.0/go.mod h1:WiHTCOHCr8H2uuxBzcw4bmMNPOuxaU9WZ9PLE9T9BgM=
-github.com/gopsql/pagination v1.0.0 h1:BLq/XpB8zdhOxuvUuk/sx8y0vnUUanXSNbTDJpAScmw=
-github.com/gopsql/pagination v1.0.0/go.mod h1:9XJ4kQ7HiMbSmE4w23y9f/lWEVlMydTLYA6OMpCkeQQ=
 github.com/gopsql/pagination/v2 v2.0.1 h1:WOT0SaXm3SohmpnLOJe4cbpT9H8KR7KQr5jAO6OpjDg=
 github.com/gopsql/pagination/v2 v2.0.1/go.mod h1:enDfzE4JHiIEkvNHF5sL+xhujdYcLA+D3gEWMuCjICU=
 github.com/gopsql/pgx v1.0.0 h1:6ZzaFUpMAoe6CrsQ9KIzW0Qagu5lRV5KvJHSzJ22z6c=
@@ -213,8 +210,6 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/pty v1.1.8/go.mod h1:O1sed60cT9XZ5uDucP5qwvh+TE3NnUj51EiZO/lmSfw=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/labstack/echo v1.4.4 h1:1bEiBNeGSUKxcPDGfZ/7IgdhJJZx8wV/pICJh4W2NJI=
-github.com/labstack/echo v3.3.10+incompatible h1:pGRcYk231ExFAyoAjAfD85kQzRJCRI8bbnE7CX5OEgg=
 github.com/labstack/echo/v4 v4.3.0 h1:DCP6cbtT+Zu++K6evHOJzSgA2115cPMuCx0xg55q1EQ=
 github.com/labstack/echo/v4 v4.3.0/go.mod h1:PvmtTvhVqKDzDQy4d3bWzPjZLzom4iQbAZy2sgZ/qI8=
 github.com/labstack/gommon v0.3.0 h1:JEeO0bvc78PKdyHxloTKiF8BD5iGrH8T6MSeGvSgob0=
