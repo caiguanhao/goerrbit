@@ -19,8 +19,10 @@ func init() {
 
 func (c nsCtrl) init(g *echo.Group) {
 	g.GET("/notification-services", c.list)
+	g.GET("/notification-services/related", c.related)
 	g.GET("/apps/:id/notification-services", c.listApp)
 	g.POST("/apps/:id/notification-services", c.addOrUpdate, UserMustBeAdmin)
+	g.POST("/apps/:id/notification-services/related", c.copySettings, UserMustBeAdmin)
 	g.DELETE("/apps/:id/notification-services", c.remove, UserMustBeAdmin)
 	g.PATCH("/apps/:id/notification-services", c.toggle, UserMustBeAdmin)
 	g.PUT("/apps/:id/notification-services", c.test, UserMustBeAdmin)
@@ -30,6 +32,22 @@ func (_ nsCtrl) list(c echo.Context) error {
 	return c.JSON(200, struct {
 		NotificatinonServices plugins.Plugins
 	}{c.Get("Services").(plugins.Plugins)})
+}
+
+func (_ nsCtrl) related(c echo.Context) error {
+	appIds := []int{}
+	c.(Ctx).ModelNotificationService.Select("app_id",
+		"WHERE name = $1 AND app_id != $2",
+		c.QueryParam("Name"), c.QueryParam("AppId")).MustQuery(&appIds)
+	var apps []models.App
+	c.(Ctx).ModelApp.Find("WHERE id = ANY($1) ORDER BY id ASC", appIds).MustQuery(&apps)
+	a := []serializers.AdminAppSimple{}
+	for _, app := range apps {
+		a = append(a, serializers.NewAdminAppSimple(app))
+	}
+	return c.JSON(200, struct {
+		Apps []serializers.AdminAppSimple
+	}{a})
 }
 
 func (_ nsCtrl) listApp(c echo.Context) error {
@@ -104,6 +122,31 @@ func (ctrl nsCtrl) addOrUpdate(c echo.Context) error {
 		)().MustExecute()
 	}
 
+	return ctrl.listApp(c)
+}
+
+func (ctrl nsCtrl) copySettings(c echo.Context) error {
+	var app models.App
+	c.(Ctx).ModelApp.Find("WHERE id = $1", c.Param("id")).MustQuery(&app)
+	var req struct {
+		From int
+		Name string
+	}
+	c.Bind(&req)
+	m := c.(Ctx).ModelNotificationService
+	var ns models.NotificationService
+	m.Find("WHERE app_id = $1 AND name = $2", req.From, req.Name).MustQuery(&ns)
+	if m.MustExists("WHERE app_id = $1 AND name = $2", app.Id, ns.Name) {
+		m.Update(
+			m.Permit("Options").Filter(ns),
+		)("WHERE app_id = $1 AND name = $2", app.Id, ns.Name).MustExecute()
+	} else {
+		ns.AppId = app.Id
+		ns.Enabled = true
+		m.Insert(
+			m.Permit("AppId", "Name", "Options", "Enabled").Filter(ns),
+		)().MustExecute()
+	}
 	return ctrl.listApp(c)
 }
 
