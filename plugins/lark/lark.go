@@ -10,7 +10,7 @@ import (
 type (
 	Lark struct {
 		AppId     string `validate:"required" label:"App ID" placeholder:"Lark App ID"`
-		AppSecret string `validate:"required" label:"App Secret" placeholder:"Lark App Secret"`
+		AppSecret string `validate:"required" type:"password" label:"App Secret" placeholder:"Lark App Secret"`
 		Target    string `validate:"required" label:"Target" hint:"ID of a chat or user" placeholder:"Chat or user"`
 		Template  string `label:"Template" type:"textarea" placeholder:"Leave this blank to use default template"`
 	}

@@ -23,11 +23,12 @@ type (
 	pluginNewFunc func() interface{}
 
 	pluginField struct {
-		Name        string
-		Label       string
-		Type        string
-		Hint        string
-		Placeholder string
+		Name         string
+		Label        string
+		Type         string
+		Hint         string
+		Placeholder  string
+		DefaultValue interface{}
 	}
 
 	NotificationService interface {
@@ -56,18 +57,35 @@ func (plugins Plugins) FindByName(name string) *Plugin {
 	return nil
 }
 
+func (f pluginNewFunc) ProtectedFields() (fields []string) {
+	instance := f()
+	rt := reflect.TypeOf(instance)
+	for i := 0; i < rt.NumField(); i++ {
+		f := rt.Field(i)
+		if f.Tag.Get("type") == "password" {
+			fields = append(fields, f.Name)
+		}
+	}
+	return
+}
+
 func (f pluginNewFunc) MarshalJSON() ([]byte, error) {
 	instance := f()
 	fields := []pluginField{}
 	rt := reflect.TypeOf(instance)
+	rv := reflect.ValueOf(instance)
 	for i := 0; i < rt.NumField(); i++ {
 		f := rt.Field(i)
+		if f.PkgPath != "" { // ignore unexported fields
+			continue
+		}
 		fields = append(fields, pluginField{
-			Name:        f.Name,
-			Label:       f.Tag.Get("label"),
-			Type:        f.Tag.Get("type"),
-			Hint:        f.Tag.Get("hint"),
-			Placeholder: f.Tag.Get("placeholder"),
+			Name:         f.Name,
+			Label:        f.Tag.Get("label"),
+			Type:         f.Tag.Get("type"),
+			Hint:         f.Tag.Get("hint"),
+			Placeholder:  f.Tag.Get("placeholder"),
+			DefaultValue: rv.Field(i).Interface(),
 		})
 	}
 	return json.Marshal(fields)

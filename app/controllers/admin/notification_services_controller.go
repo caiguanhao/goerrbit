@@ -37,17 +37,18 @@ func (_ nsCtrl) listApp(c echo.Context) error {
 	c.(Ctx).ModelApp.Find("WHERE id = $1", c.Param("id")).MustQuery(&app)
 	services := []models.NotificationService{}
 	c.(Ctx).ModelNotificationService.Find("WHERE app_id = $1 ORDER BY created_at ASC", app.Id).MustQuery(&services)
-	ret := struct {
-		NotificatinonServices []serializers.AdminNotificationService
-	}{}
-	ret.NotificatinonServices = []serializers.AdminNotificationService{}
+	nss := []serializers.AdminNotificationService{}
 	for _, s := range services {
-		if c.Get("Services").(plugins.Plugins).FindByName(s.Name) == nil {
+		plugin := c.Get("Services").(plugins.Plugins).FindByName(s.Name)
+		if plugin == nil {
 			continue
 		}
-		ret.NotificatinonServices = append(ret.NotificatinonServices, serializers.NewAdminNotificationService(s))
+		s.ProtectOptions(plugin.New.ProtectedFields()...)
+		nss = append(nss, serializers.NewAdminNotificationService(s))
 	}
-	return c.JSON(200, ret)
+	return c.JSON(200, struct {
+		NotificatinonServices []serializers.AdminNotificationService
+	}{nss})
 }
 
 func (ctrl nsCtrl) addOrUpdate(c echo.Context) error {
@@ -75,15 +76,24 @@ func (ctrl nsCtrl) addOrUpdate(c echo.Context) error {
 		})
 	}
 
+	var existing []models.NotificationService
+	m.Find("WHERE app_id = $1 AND name = $2", ns.AppId, ns.Name).MustQuery(&existing)
+
 	instance := reflect.New(reflect.TypeOf(service.New()))
 	mx := psql.NewModel(instance.Elem().Interface())
+	if len(existing) > 0 {
+		mx.MustAssign(
+			instance.Interface(),
+			mx.PermitAllExcept().Filter(existing[0].Options),
+		)
+	}
 	mx.MustAssign(
 		instance.Interface(),
 		mx.PermitAllExcept().Filter(ns.Options),
 	)
 	c.(Ctx).MustValidate(instance.Elem().Interface())
 	ns.Options = instance.Elem().Interface()
-	if m.MustExists("WHERE app_id = $1 AND name = $2", ns.AppId, ns.Name) {
+	if len(existing) > 0 {
 		m.Update(
 			m.Permit("Options").Filter(ns),
 		)("WHERE app_id = $1 AND name = $2", ns.AppId, ns.Name).MustExecute()
