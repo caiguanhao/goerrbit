@@ -22,8 +22,8 @@ type (
 
 func (msgtyp) Options() [][]interface{} {
 	return [][]interface{}{
-		{0, "Text message"},
-		{1, "Rich text message (post)"},
+		{0, "Plain Text Message"},
+		{1, "Rich Text Message"},
 	}
 }
 
