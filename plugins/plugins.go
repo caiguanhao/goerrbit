@@ -26,6 +26,7 @@ type (
 		Name         string
 		Label        string
 		Type         string
+		Options      [][]interface{}
 		Hint         string
 		Placeholder  string
 		DefaultValue interface{}
@@ -33,6 +34,10 @@ type (
 
 	NotificationService interface {
 		CreateNotification(map[string]string) error
+	}
+
+	fieldHasOptions interface {
+		Options() [][]interface{}
 	}
 )
 
@@ -79,14 +84,19 @@ func (f pluginNewFunc) MarshalJSON() ([]byte, error) {
 		if f.PkgPath != "" { // ignore unexported fields
 			continue
 		}
-		fields = append(fields, pluginField{
+		defValue := rv.Field(i).Interface()
+		field := pluginField{
 			Name:         f.Name,
 			Label:        f.Tag.Get("label"),
 			Type:         f.Tag.Get("type"),
 			Hint:         f.Tag.Get("hint"),
 			Placeholder:  f.Tag.Get("placeholder"),
-			DefaultValue: rv.Field(i).Interface(),
-		})
+			DefaultValue: defValue,
+		}
+		if fho, ok := defValue.(fieldHasOptions); ok {
+			field.Options = fho.Options()
+		}
+		fields = append(fields, field)
 	}
 	return json.Marshal(fields)
 }
