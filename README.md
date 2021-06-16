@@ -20,6 +20,12 @@ Get `goerrbit` with [frontend files](https://github.com/caiguanhao/goerrbit.vue)
 go get -v -u -tags frontend github.com/caiguanhao/goerrbit
 ```
 
+Windows can't use plugins, you can build `goerrbit` with all plugins:
+
+```
+go get -v -u -tags frontend github.com/caiguanhao/goerrbit/app/cli/goerrbit
+```
+
 ## Usage
 
 Run database migrations:
