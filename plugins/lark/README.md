@@ -10,6 +10,8 @@ For details of the JSON object structure, see
 [Lark Docs](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/im-v1/message/create_json).
 
 3. Template uses Golang's [text/template](https://golang.org/pkg/text/template/) package.
+You can see default template for plain text message (`DefaultTemplate`) or rich
+text message (`DefaultPostTemplate`) in the `lark.go` file.
 
 Currently, you can use these variables:
 

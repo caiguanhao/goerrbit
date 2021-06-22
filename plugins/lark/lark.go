@@ -29,7 +29,7 @@ func (msgtyp) Options() [][]interface{} {
 
 var (
 	Name        = "lark"
-	Description = "Send error messages to Lark"
+	Description = `Send error messages to Lark. [README](https://github.com/caiguanhao/goerrbit/tree/master/plugins/lark)`
 
 	DefaultTemplate = `{{.Message}}
 {{.AppName}} ({{.Environment}})
