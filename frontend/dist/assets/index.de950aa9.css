@@ -689,6 +689,11 @@ main > .container {
 .highlighted {
   animation: background-fade-highlight 2.5s ease-out;
 }
+.fake-input { /* this prevents autofill */
+  position: absolute;
+  left: -100%;
+  opacity: 0;
+}
 
 
 
@@ -697,16 +702,24 @@ main > .container {
 }
 
 
-.backtrace[data-v-9ea073a6] {
-  width: 240px;
+.next[data-v-34e68d5c] {
+  margin-left: 1.5em;
+}
+.lines[data-v-34e68d5c] {
+  display: inline;
+  width: 60px;
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: auto;
 }
 
 
 
-.disabled[data-v-6a1d1544] {
+
+.disabled[data-v-313d70dd] {
   opacity: 0.7;
 }
-.value[data-v-6a1d1544] {
+.value[data-v-313d70dd] {
   white-space: pre-wrap;
 }
 

@@ -3311,6 +3311,7 @@ function getSequence(arr) {
 }
 const isTeleport = (type) => type.__isTeleport;
 const COMPONENTS = "components";
+const DIRECTIVES = "directives";
 function resolveComponent(name, maybeSelfReference) {
   return resolveAsset(COMPONENTS, name, true, maybeSelfReference) || name;
 }
@@ -3321,6 +3322,9 @@ function resolveDynamicComponent(component) {
   } else {
     return component || NULL_DYNAMIC_COMPONENT;
   }
+}
+function resolveDirective(name) {
+  return resolveAsset(DIRECTIVES, name);
 }
 function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false) {
   const instance = currentRenderingInstance || currentInstance;
@@ -14718,4 +14722,4 @@ defineComponent({
     };
   }
 });
-export { library as A, faThumbsUp as B, faCheckCircle as C, faCheck as D, faTimes as E, Fragment as F, faCrown as G, faCaretUp as H, faCaretDown as I, createApp as J, FontAwesomeIcon as K, Modal as M, VueToastificationPlugin as V, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, createTextVNode as f, renderList as g, renderSlot as h, popScopeId as i, withDirectives as j, withScopeId as k, format as l, vModelCheckbox as m, vModelDynamic as n, openBlock as o, pushScopeId as p, vModelSelect as q, resolveComponent as r, createStaticVNode as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, createRouter as x, createWebHistory as y, reactive as z };
+export { createWebHistory as A, reactive as B, library as C, faThumbsUp as D, faCheckCircle as E, Fragment as F, faCheck as G, faTimes as H, faCrown as I, faCaretUp as J, faCaretDown as K, createApp as L, Modal as M, FontAwesomeIcon as N, VueToastificationPlugin as V, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, createTextVNode as f, renderList as g, renderSlot as h, popScopeId as i, withDirectives as j, withScopeId as k, format as l, vModelCheckbox as m, vModelRadio as n, openBlock as o, pushScopeId as p, vModelSelect as q, resolveComponent as r, vModelDynamic as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, resolveDirective as x, createStaticVNode as y, createRouter as z };
