@@ -103,7 +103,7 @@ func (main Main) Run() {
 	for _, path := range soFiles {
 		p, err := plugins.Open(path)
 		if err != nil {
-			log.Error("error opening plugin", path)
+			log.Error("error opening plugin", path, err)
 			continue
 		}
 		log.Info("opened", path)
