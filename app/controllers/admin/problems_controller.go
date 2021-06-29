@@ -22,6 +22,9 @@ func (c problemsCtrl) init(g *echo.Group) {
 	g.GET("/apps/:app_id/problems", c.list)
 	g.GET("/apps/:app_id/problems/:id", c.show)
 	g.PUT("/apps/:app_id/problems/:id/resolve", c.resolve)
+	g.POST("/problems/resolve", c.resolveMultiple)
+	g.POST("/problems/unresolve", c.unresolveMultiple)
+	g.DELETE("/problems", c.destroy, UserMustBeAdmin)
 }
 
 func (ctrl problemsCtrl) list(c echo.Context) error {
@@ -118,6 +121,52 @@ func (ctrl problemsCtrl) resolve(c echo.Context) error {
 		}),
 	)("WHERE app_id = $1 AND id = $2", app.Id, c.Param("id")).MustExecute()
 	return ctrl.show(c)
+}
+
+func (ctrl problemsCtrl) resolveMultiple(c echo.Context) error {
+	n := time.Now()
+	return ctrl.setResolvedAt(c, &n)
+}
+
+func (ctrl problemsCtrl) unresolveMultiple(c echo.Context) error {
+	return ctrl.setResolvedAt(c, nil)
+}
+
+func (problemsCtrl) setResolvedAt(c echo.Context, t *time.Time) error {
+	var req struct {
+		Ids []int `json:"ids"`
+	}
+	c.Bind(&req)
+	ids := []int{}
+	if len(req.Ids) > 0 {
+		p := c.(Ctx).ModelProblem
+		p.Update(
+			p.Changes(map[string]interface{}{
+				"ResolvedAt": t,
+			}),
+		)("WHERE id = ANY($1) RETURNING id", req.Ids).MustQuery(&ids)
+	}
+	return c.JSON(200, struct {
+		Changed []int
+	}{ids})
+}
+
+func (ctrl problemsCtrl) destroy(c echo.Context) error {
+	var req struct {
+		Ids []int `json:"ids"`
+	}
+	c.Bind(&req)
+	var noticesDeleted int
+	ids := []int{}
+	if len(req.Ids) > 0 {
+		c.(Ctx).ModelNotice.Delete("WHERE problem_id = ANY($1)", req.Ids).MustExecute(&noticesDeleted)
+		c.(Ctx).ModelProblem.Delete("WHERE id = ANY($1) RETURNING id", req.Ids).MustQuery(&ids)
+	}
+	return c.JSON(200, struct {
+		Deleted         []int
+		ProblemsDeleted int
+		NoticesDeleted  int
+	}{ids, len(ids), noticesDeleted})
 }
 
 func (_ problemsCtrl) findApp(c echo.Context) (app models.App) {
