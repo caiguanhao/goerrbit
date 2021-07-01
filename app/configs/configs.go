@@ -16,15 +16,18 @@ import (
 
 type (
 	Configs struct {
-		Prefix string `
-URL prefix for frontend pages.
-`
+		ListenAddress string `IP address and port to listen to.`
 
 		PostgresDatabaseConnectionURL string `
 Connect to PostgreSQL database using a URL like this:
 postgres://user:password@host:port/dbname?sslmode=disable
 Docs: https://pkg.go.dev/github.com/lib/pq#hdr-Connection_String_Parameters
 `
+
+		Prefix string `URL prefix for frontend pages.`
+
+		PluginsDirectory string `Directory to find and store plugins.`
+
 		SessionPrivateKey SessionPrivateKey `
 Private key used when generating session token. To generate new key, remove
 this config or leave this empty, and then save this file and run with option
@@ -59,11 +62,17 @@ func WriteConfigs(file string, conf *Configs) (err error) {
 	if conf == nil {
 		return
 	}
-	if conf.Prefix == "" {
-		conf.Prefix = "https://www.example.com"
+	if conf.ListenAddress == "" {
+		conf.ListenAddress = "127.0.0.1:8000"
 	}
 	if conf.PostgresDatabaseConnectionURL == "" {
 		conf.PostgresDatabaseConnectionURL = "postgres://localhost:5432/goerrbit?sslmode=disable"
+	}
+	if conf.Prefix == "" {
+		conf.Prefix = "https://www.example.com"
+	}
+	if conf.PluginsDirectory == "" {
+		conf.PluginsDirectory = "plugins"
 	}
 	if conf.SessionPrivateKey.PrivateKey == nil {
 		var privatekey *rsa.PrivateKey
@@ -92,7 +101,9 @@ func ReadWriteConfigs(file string, create bool) *Configs {
 			log.Fatal(err)
 		}
 		log.Println("Config file written:", file)
-		os.Exit(0)
+		if create {
+			os.Exit(0)
+		}
 	}
 	return config
 }

@@ -128,7 +128,7 @@ func Open(path string) (*Plugin, error) {
 }
 
 func Find(dir string) []string {
-	if runtime.GOOS == "windows" {
+	if dir == "" || runtime.GOOS == "windows" {
 		return []string{}
 	}
 	files := []string{}

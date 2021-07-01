@@ -20,6 +20,7 @@ func New(conn db.DB, log logger.Logger, config *configs.Configs, static http.Fil
 	ctxModels := shared.NewCtxModels(conn, log)
 
 	e := echo.New()
+	e.HidePort = true
 	e.HideBanner = true
 	e.Validator = shared.NewValidator(ctxModels)
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
