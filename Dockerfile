@@ -42,7 +42,9 @@ ENV GOOS=${TARGETOS} GOARCH=${TARGETARCH}
 RUN --mount=target=. \
     --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
+    (cd plugins/command/main && go build -buildmode=plugin -o /dist/goerrbit-plugin-command.so .) && \
     (cd plugins/lark/main && go build -buildmode=plugin -o /dist/goerrbit-plugin-lark.so .)
 
 FROM base-copy AS plugin
+COPY --from=build-plugin /dist/goerrbit-plugin-command.so /plugins/goerrbit-plugin-command-${TARGETOS}-${TARGETARCH}.so
 COPY --from=build-plugin /dist/goerrbit-plugin-lark.so /plugins/goerrbit-plugin-lark-${TARGETOS}-${TARGETARCH}.so
