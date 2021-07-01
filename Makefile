@@ -13,7 +13,12 @@ plugin:
 		--output dist/ \
 		--platform=linux/amd64
 
+version:
+	@(echo "package cli" && echo && \
+		echo "const VERSION = \"$$(git describe --tags --abbrev=0)\"") \
+		> app/cli/version.go
+
 clean:
 	rm -rf dist/
 
-.PHONY: dist bin plugin clean
+.PHONY: dist bin plugin clean version

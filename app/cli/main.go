@@ -44,7 +44,13 @@ func (main Main) Run() {
 	configFile := flag.String("c", defaultConfigFile, "location of the config file")
 	createConfig := flag.Bool("C", false, "create (update if exists) config file and exit")
 	toLogin := flag.Bool("login", false, "reset password of first admin (create if not exists) and exit")
+	showVersion := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(VERSION)
+		return
+	}
 
 	log := logger.StandardLogger
 
