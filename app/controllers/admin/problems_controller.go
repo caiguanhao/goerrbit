@@ -24,6 +24,8 @@ func (c problemsCtrl) init(g *echo.Group) {
 	g.PUT("/apps/:app_id/problems/:id/resolve", c.resolve)
 	g.POST("/problems/resolve", c.resolveMultiple)
 	g.POST("/problems/unresolve", c.unresolveMultiple)
+	g.POST("/problems/merge", c.merge, UserMustBeAdmin)
+	g.POST("/problems/unmerge", c.unmerge, UserMustBeAdmin)
 	g.DELETE("/problems", c.destroy, UserMustBeAdmin)
 }
 
@@ -151,7 +153,116 @@ func (problemsCtrl) setResolvedAt(c echo.Context, t *time.Time) error {
 	}{ids})
 }
 
-func (ctrl problemsCtrl) destroy(c echo.Context) error {
+func (problemsCtrl) merge(c echo.Context) error {
+	need2problems := func() error { return c.JSON(400, struct{ Message string }{"need 2 different problems"}) }
+	var req struct {
+		Ids []int `json:"ids"`
+	}
+	c.Bind(&req)
+	if len(req.Ids) < 2 {
+		return need2problems()
+	}
+	var problems []models.Problem
+	p := c.(Ctx).ModelProblem
+	p.Find("WHERE id = ANY($1) ORDER BY last_notice_at DESC", req.Ids).MustQuery(&problems)
+	if len(problems) < 2 {
+		return need2problems()
+	}
+	mergedProblem := problems[0]
+	childProblems := problems[1:]
+	var childProblemIds []int
+	for _, problem := range childProblems {
+		childProblemIds = append(childProblemIds, problem.Id)
+	}
+	n := c.(Ctx).ModelNotice
+	n.NewSQLWithValues(
+		"UPDATE notices SET meta = jsonb_set(meta, '{old_problem_id}', to_jsonb(problem_id)) "+
+			"WHERE problem_id = ANY($1)", childProblemIds,
+	).MustExecute()
+	n.Update(
+		n.Changes(map[string]interface{}{
+			"ProblemId": mergedProblem.Id,
+		}),
+	)("WHERE problem_id = ANY($1)", childProblemIds).MustExecute()
+	p.Delete("WHERE id = ANY($1)", childProblemIds).MustExecute()
+	c.(Ctx).RecacheProblem(mergedProblem)
+	return c.NoContent(204)
+}
+
+func (ctrl problemsCtrl) unmerge(c echo.Context) error {
+	var req struct {
+		Ids []int `json:"ids"`
+	}
+	c.Bind(&req)
+
+	var problems []models.Problem
+	p := c.(Ctx).ModelProblem
+	p.Find("WHERE id = ANY($1)", req.Ids).MustQuery(&problems)
+
+	unmerged := 0
+	for _, problem := range problems {
+		if ctrl.unmergeProblem(c, problem) == false {
+			continue
+		}
+		unmerged += 1
+	}
+
+	return c.JSON(200, struct {
+		Unmerged int
+	}{unmerged})
+}
+
+func (problemsCtrl) unmergeProblem(c echo.Context, problem models.Problem) bool {
+	p := c.(Ctx).ModelProblem
+	n := c.(Ctx).ModelNotice
+	var app models.App
+	c.(Ctx).ModelApp.Find("WHERE id = $1", problem.AppId).MustQuery(&app)
+	var notices []models.Notice
+	n.Find("WHERE problem_id = $1 ORDER BY created_at ASC", problem.Id).MustQuery(&notices)
+	noticesById := map[int][]int{}
+	fingerprintById := map[int]string{}
+	for _, notice := range notices {
+		if notice.OldProblemId == 0 {
+			continue
+		}
+		noticesById[notice.OldProblemId] = append(noticesById[notice.OldProblemId], notice.Id)
+		if fingerprintById[notice.OldProblemId] == "" {
+			fingerprintById[notice.OldProblemId] = app.GenerateFingerprint(notice)
+		}
+	}
+	if len(noticesById) == 0 {
+		return false
+	}
+	for i, ids := range noticesById {
+		var newProblemId int
+		p.Insert(
+			p.Changes(map[string]interface{}{
+				"AppId":        problem.AppId,
+				"Fingerprint":  fingerprintById[i],
+				"ErrorClass":   problem.ErrorClass,
+				"Environment":  problem.Environment,
+				"ResolvedAt":   nil,
+				"LastNoticeId": ids[len(ids)-1],
+			}),
+		)("RETURNING id").MustQueryRow(&newProblemId)
+		var newProblem models.Problem
+		p.Find("WHERE id = $1", newProblemId).MustQuery(&newProblem)
+		n.Update(
+			n.Changes(map[string]interface{}{
+				"ProblemId": newProblem.Id,
+			}),
+		)("WHERE id = ANY($1)", ids).MustExecute()
+		n.NewSQLWithValues(
+			"UPDATE notices SET meta = meta - 'old_problem_id' "+
+				"WHERE id = ANY($1)", ids,
+		).MustExecute()
+		c.(Ctx).RecacheProblem(newProblem)
+	}
+	c.(Ctx).RecacheProblem(problem)
+	return true
+}
+
+func (problemsCtrl) destroy(c echo.Context) error {
 	var req struct {
 		Ids []int `json:"ids"`
 	}

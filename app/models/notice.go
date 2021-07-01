@@ -21,6 +21,7 @@ type (
 		Notifier          Notifier               `jsonb:"meta"`
 		UserAttributes    map[string]interface{} `jsonb:"meta"`
 		Framework         string                 `jsonb:"meta"`
+		OldProblemId      int                    `jsonb:"meta"`
 		CreatedAt         time.Time
 	}
 
