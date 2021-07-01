@@ -4,12 +4,14 @@ go 1.15
 
 replace (
 	github.com/caiguanhao/goerrbit => ../../../
+	github.com/caiguanhao/goerrbit/plugins/command => ../../../plugins/command/
 	github.com/caiguanhao/goerrbit/plugins/lark => ../../../plugins/lark/
 )
 
 require (
-	github.com/caiguanhao/goerrbit v1.2.1-0.20210622024941-cf422c0e906f
-	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-20210622024941-cf422c0e906f
+	github.com/caiguanhao/goerrbit v1.2.2-0.20210701143852-a131f96498a2
+	github.com/caiguanhao/goerrbit/plugins/command v0.0.0-20210701143852-a131f96498a2
+	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-20210701143852-a131f96498a2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/gopsql/bcrypt v1.0.0
