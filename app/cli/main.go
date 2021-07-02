@@ -87,7 +87,12 @@ func (main Main) Run() {
 			name = "admin"
 			user := models.NewUser(name, password)
 			user.IsAdmin = true
-			m.Insert(m.Permit("Name", "Password", "IsAdmin").Filter(user))().MustExecute()
+			m.Insert(m.Permit("Name", "Password", "IsAdmin").Filter(user))(
+				"ON CONFLICT (lower(name)) DO UPDATE SET " +
+					"deleted_at = NULL, " +
+					"is_admin = EXCLUDED.is_admin, " +
+					"password = EXCLUDED.password",
+			).MustExecute()
 			log.Info("New admin user has been created:")
 			log.Info("  - name:", name)
 			log.Info("  - password:", password)
