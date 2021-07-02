@@ -19,6 +19,7 @@ import (
 	"github.com/caiguanhao/goerrbit/app/models"
 	"github.com/caiguanhao/goerrbit/frontend"
 	"github.com/caiguanhao/goerrbit/plugins"
+	"github.com/gopsql/db"
 	"github.com/gopsql/logger"
 	"github.com/gopsql/migrator"
 	"github.com/gopsql/pgx"
@@ -78,35 +79,6 @@ func (main Main) Run() {
 	}
 	defer conn.Close()
 
-	if *toLogin {
-		m := psql.NewModel(models.User{}, conn, log)
-		var name string
-		m.Select("name", "WHERE is_admin IS TRUE ORDER BY id ASC").QueryRow(&name)
-		password := randomString(8)
-		if name == "" {
-			name = "admin"
-			user := models.NewUser(name, password)
-			user.IsAdmin = true
-			m.Insert(m.Permit("Name", "Password", "IsAdmin").Filter(user))(
-				"ON CONFLICT (lower(name)) DO UPDATE SET " +
-					"deleted_at = NULL, " +
-					"is_admin = EXCLUDED.is_admin, " +
-					"password = EXCLUDED.password",
-			).MustExecute()
-			log.Info("New admin user has been created:")
-			log.Info("  - name:", name)
-			log.Info("  - password:", password)
-		} else {
-			user := models.NewUser(name, password)
-			user.DeletedAt = nil
-			m.Update(m.Permit("Password", "DeletedAt").Filter(user))("WHERE name = $1", name).MustExecute()
-			log.Info("Password of admin user has been reset:")
-			log.Info("  - name:", name)
-			log.Info("  - password:", password)
-		}
-		return
-	}
-
 	m := &migrator.Migrator{
 		Scope:  "goerrbit",
 		DB:     conn,
@@ -121,6 +93,11 @@ func (main Main) Run() {
 
 	if *toRollback {
 		m.Rollback()
+		return
+	}
+
+	if *toLogin {
+		resetLogin(conn, log)
 		return
 	}
 
@@ -162,6 +139,34 @@ func (main Main) Run() {
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
+	}
+}
+
+func resetLogin(conn db.DB, log logger.Logger) {
+	m := psql.NewModel(models.User{}, conn, log)
+	var name string
+	m.Select("name", "WHERE is_admin IS TRUE ORDER BY id ASC").QueryRow(&name)
+	password := randomString(8)
+	if name == "" {
+		name = "admin"
+		user := models.NewUser(name, password)
+		user.IsAdmin = true
+		m.Insert(m.Permit("Name", "Password", "IsAdmin").Filter(user))(
+			"ON CONFLICT (lower(name)) DO UPDATE SET " +
+				"deleted_at = NULL, " +
+				"is_admin = EXCLUDED.is_admin, " +
+				"password = EXCLUDED.password",
+		).MustExecute()
+		log.Info("New admin user has been created:")
+		log.Info("  - name:", name)
+		log.Info("  - password:", password)
+	} else {
+		user := models.NewUser(name, password)
+		user.DeletedAt = nil
+		m.Update(m.Permit("Password", "DeletedAt").Filter(user))("WHERE name = $1", name).MustExecute()
+		log.Info("Password of admin user has been reset:")
+		log.Info("  - name:", name)
+		log.Info("  - password:", password)
 	}
 }
 
