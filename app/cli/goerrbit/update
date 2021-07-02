@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+deps=($(awk '/require/{y=1} y&&/goerrbit/{print $1}' go.mod))
+for dep in "${deps[@]}"
+do
+  set -x
+  go get -v -u -d $dep@master
+  set +x
+done
+
+set -x
+# if you don't have grepdiff, run "brew install patchutils"
+git diff -G goerrbit go.mod | grepdiff -E goerrbit --output-matching=hunk | git apply --cached
+git restore go.mod go.sum
