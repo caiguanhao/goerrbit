@@ -53,11 +53,9 @@ func (c Ctx) NewSession(userId int) string {
 	var sessionId string
 	m := c.ModelUserSession
 	m.Insert(
-		m.Changes(map[string]interface{}{
-			"UserId":    userId,
-			"IpAddress": c.RealIP(),
-			"UserAgent": c.Request().UserAgent(),
-		}),
+		"UserId", userId,
+		"IpAddress", c.RealIP(),
+		"UserAgent", c.Request().UserAgent(),
 	)("RETURNING session_id").MustQueryRow(&sessionId)
 	m.Delete("WHERE id IN (SELECT id FROM user_sessions WHERE user_id = $1 "+
 		"ORDER BY updated_at DESC OFFSET $2)", userId, 10).MustExecute()
@@ -119,16 +117,16 @@ func (c Ctx) CurrentUser() *models.User {
 	if e != nil {
 		return nil
 	}
-	changes := map[string]interface{}{}
+	changes := []interface{}{}
 	if ip := c.RealIP(); userSession.IpAddress != ip {
-		changes["IpAddress"] = ip
+		changes = append(changes, "IpAddress", ip)
 	}
 	if ua := c.Request().UserAgent(); userSession.UserAgent != ua {
-		changes["UserAgent"] = ua
+		changes = append(changes, "UserAgent", ua)
 	}
 	if len(changes) > 0 {
 		m := c.ModelUserSession
-		if m.Update(m.Changes(changes))("WHERE id = $1", userSession.Id).Execute() != nil {
+		if m.Update(changes...)("WHERE id = $1", userSession.Id).Execute() != nil {
 			return nil
 		}
 	}

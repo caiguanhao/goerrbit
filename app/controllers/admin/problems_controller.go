@@ -118,9 +118,7 @@ func (ctrl problemsCtrl) resolve(c echo.Context) error {
 	app := ctrl.findApp(c)
 	p := c.(Ctx).ModelProblem
 	p.Update(
-		p.Changes(map[string]interface{}{
-			"ResolvedAt": time.Now(),
-		}),
+		"ResolvedAt", time.Now(),
 	)("WHERE app_id = $1 AND id = $2", app.Id, c.Param("id")).MustExecute()
 	return ctrl.show(c)
 }
@@ -143,9 +141,7 @@ func (problemsCtrl) setResolvedAt(c echo.Context, t *time.Time) error {
 	if len(req.Ids) > 0 {
 		p := c.(Ctx).ModelProblem
 		p.Update(
-			p.Changes(map[string]interface{}{
-				"ResolvedAt": t,
-			}),
+			"ResolvedAt", t,
 		)("WHERE id = ANY($1) RETURNING id", req.Ids).MustQuery(&ids)
 	}
 	return c.JSON(200, struct {
@@ -180,9 +176,7 @@ func (problemsCtrl) merge(c echo.Context) error {
 			"WHERE problem_id = ANY($1)", childProblemIds,
 	).MustExecute()
 	n.Update(
-		n.Changes(map[string]interface{}{
-			"ProblemId": mergedProblem.Id,
-		}),
+		"ProblemId", mergedProblem.Id,
 	)("WHERE problem_id = ANY($1)", childProblemIds).MustExecute()
 	p.Delete("WHERE id = ANY($1)", childProblemIds).MustExecute()
 	c.(Ctx).RecacheProblem(mergedProblem)
@@ -236,21 +230,17 @@ func (problemsCtrl) unmergeProblem(c echo.Context, problem models.Problem) bool 
 	for i, ids := range noticesById {
 		var newProblemId int
 		p.Insert(
-			p.Changes(map[string]interface{}{
-				"AppId":        problem.AppId,
-				"Fingerprint":  fingerprintById[i],
-				"ErrorClass":   problem.ErrorClass,
-				"Environment":  problem.Environment,
-				"ResolvedAt":   nil,
-				"LastNoticeId": ids[len(ids)-1],
-			}),
+			"AppId", problem.AppId,
+			"Fingerprint", fingerprintById[i],
+			"ErrorClass", problem.ErrorClass,
+			"Environment", problem.Environment,
+			"ResolvedAt", nil,
+			"LastNoticeId", ids[len(ids)-1],
 		)("RETURNING id").MustQueryRow(&newProblemId)
 		var newProblem models.Problem
 		p.Find("WHERE id = $1", newProblemId).MustQuery(&newProblem)
 		n.Update(
-			n.Changes(map[string]interface{}{
-				"ProblemId": newProblem.Id,
-			}),
+			"ProblemId", newProblem.Id,
 		)("WHERE id = ANY($1)", ids).MustExecute()
 		n.NewSQLWithValues(
 			"UPDATE notices SET meta = meta - 'old_problem_id' "+

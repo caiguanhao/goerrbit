@@ -28,10 +28,8 @@ func TestCreateNotice(t *testing.T) {
 	apiKey := "example"
 	if !a.MustExists("WHERE api_key = $1", apiKey) {
 		a.Insert(
-			a.Changes(map[string]interface{}{
-				"Name":   "Example",
-				"ApiKey": apiKey,
-			}),
+			"Name", "Example",
+			"ApiKey", apiKey,
 		)().MustExecute()
 	}
 

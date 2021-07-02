@@ -151,21 +151,13 @@ func (ctrl usersCtrl) updateMe(c echo.Context) error {
 
 func (ctrl usersCtrl) restore(c echo.Context) error {
 	m := c.(Ctx).ModelUser
-	m.Update(
-		m.Changes(map[string]interface{}{
-			"DeletedAt": nil,
-		}),
-	)("WHERE id = $1", c.Param("id")).MustExecute()
+	m.Update("DeletedAt", nil)("WHERE id = $1", c.Param("id")).MustExecute()
 	return ctrl.show(c)
 }
 
 func (ctrl usersCtrl) destroy(c echo.Context) error {
 	m := c.(Ctx).ModelUser
-	m.Update(
-		m.Changes(map[string]interface{}{
-			"DeletedAt": time.Now(),
-		}),
-	)("WHERE id = $1", c.Param("id")).MustExecute()
+	m.Update("DeletedAt", time.Now())("WHERE id = $1", c.Param("id")).MustExecute()
 	c.(Ctx).ModelUserSession.Delete("WHERE user_id = $1", c.Param("id")).MustExecute()
 	return ctrl.show(c)
 }

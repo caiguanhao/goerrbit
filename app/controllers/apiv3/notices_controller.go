@@ -53,10 +53,8 @@ func (_ noticesCtrl) create(c echo.Context) error {
 	p := c.(Ctx).ModelProblem
 	if !p.MustExists("WHERE app_id = $1 AND fingerprint = $2", app.Id, fingerprint) {
 		p.Insert(
-			p.Changes(map[string]interface{}{
-				"AppId":       app.Id,
-				"Fingerprint": fingerprint,
-			}),
+			"AppId", app.Id,
+			"Fingerprint", fingerprint,
 		)().MustExecute()
 	}
 	var problem models.Problem
@@ -87,15 +85,13 @@ func (_ noticesCtrl) create(c echo.Context) error {
 
 	// update cached fields of the problem
 	p.Update(
-		p.Changes(map[string]interface{}{
-			"ErrorClass":   notice.ErrorClass,
-			"Environment":  notice.EnvironmentName(),
-			"LastNoticeAt": notice.CreatedAt,
-			"LastNoticeId": notice.Id,
-			"Message":      notice.Message,
-			"ResolvedAt":   nil,
-			"Location":     notice.Location(),
-		}),
+		"ErrorClass", notice.ErrorClass,
+		"Environment", notice.EnvironmentName(),
+		"LastNoticeAt", notice.CreatedAt,
+		"LastNoticeId", notice.Id,
+		"Message", notice.Message,
+		"ResolvedAt", nil,
+		"Location", notice.Location(),
 	)("WHERE id = $1", problem.Id).MustExecute()
 	p.NewSQLWithValues("UPDATE problems SET notices_count = notices_count + 1 WHERE id = $1", problem.Id).MustExecute()
 	sql := models.NewValueWithCountUpdateSQL("problems", "meta")
