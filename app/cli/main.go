@@ -86,6 +86,10 @@ func (main Main) Run() {
 	}
 	m.SetMigrations(migrations.Migrations)
 
+	if _, unmigrated := m.Versions(); len(unmigrated) > 0 {
+		log.Info("Warning: You have", len(unmigrated), "pending migrations. Use -migrate to run migrations.")
+	}
+
 	if *toMigrate {
 		m.Migrate()
 		return
