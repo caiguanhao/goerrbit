@@ -9,9 +9,9 @@ replace (
 )
 
 require (
-	github.com/caiguanhao/goerrbit v1.2.2-0.20210701185039-400a40de7b34
-	github.com/caiguanhao/goerrbit/plugins/command v0.0.0-20210701185039-400a40de7b34
-	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-20210701185039-400a40de7b34
+	github.com/caiguanhao/goerrbit v1.3.0
+	github.com/caiguanhao/goerrbit/plugins/command v0.0.0-20210702061225-96997f8b2e5b
+	github.com/caiguanhao/goerrbit/plugins/lark v0.0.0-20210702061225-96997f8b2e5b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/gopsql/bcrypt v1.0.0
