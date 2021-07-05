@@ -64,7 +64,12 @@ func New(conn db.DB, log logger.Logger, config *configs.Configs, static http.Fil
 
 	admin.Mount(e.Group("/api/admin"))
 	apiv3.Mount(e.Group("/api/v3"))
+
+	// noop
 	apiv5.Mount(e.Group("/api/v5"))
+	e.GET("/api/notifier-configs/*", func(c echo.Context) error {
+		return c.JSON(200, struct{}{})
+	})
 
 	if static != nil {
 		public := echo.WrapHandler(http.FileServer(static))
