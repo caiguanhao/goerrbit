@@ -3,6 +3,7 @@ package apiv3
 import (
 	"crypto/md5"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -113,8 +114,8 @@ func (_ noticesCtrl) create(c echo.Context) error {
 	}
 
 	return c.JSON(201, struct {
-		Id int `json:"id"`
-	}{id})
+		Id string `json:"id"`
+	}{strconv.Itoa(id)})
 }
 
 func md5String(i string) string {
