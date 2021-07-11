@@ -1,8 +1,14 @@
 package apiv3
 
 import (
+	"bytes"
 	"crypto/md5"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http/httptest"
 	"strconv"
 	"strings"
 	"time"
@@ -104,18 +110,74 @@ func (_ noticesCtrl) create(c echo.Context) error {
 	if shouldNotify {
 		p.Find("WHERE id = $1", problem.Id).MustQuery(&problem)
 		notification := serializers.NewNotification(app, problem, c.(Ctx).Configs.Prefix)
-		plugins := c.Get("Services").(plugins.Plugins)
 		var nss []models.NotificationService
 		c.(Ctx).ModelNotificationService.Find("WHERE app_id = $1 AND enabled = true", app.Id).MustQuery(&nss)
 		for _, ns := range nss {
-			plugin := plugins.FindByName(ns.Name)
-			plugin.CreateNotification(ns.Options, notification)
+			go createNotification(c, ns, notification)
 		}
 	}
 
 	return c.JSON(201, struct {
 		Id string `json:"id"`
 	}{strconv.Itoa(id)})
+}
+
+func createNotification(c echo.Context, ns models.NotificationService, notification serializers.Notification) {
+	services := c.Get("Services")
+	if services == nil {
+		return
+	}
+	plugins := services.(plugins.Plugins)
+	defer func() {
+		if r := recover(); r != nil {
+			NotifySelf(c, r, map[string]interface{}{
+				"Plugins":             plugins.Names(),
+				"NotificationService": ns,
+				"Notification":        notification,
+			})
+		}
+	}()
+	plugin := plugins.FindByName(ns.Name)
+	if plugin == nil {
+		panic(errors.New("no such plugin: " + ns.Name))
+	}
+	err := plugin.CreateNotification(ns.Options, notification)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func NotifySelf(c echo.Context, err interface{}, params map[string]interface{}) error {
+	// find or create app
+	const selfErrbitName = "Self.Errbit"
+	var selfErrbitApiKey string
+	a := c.(Ctx).ModelApp
+	a.Select("api_key", "WHERE name = $1", selfErrbitName).QueryRow(&selfErrbitApiKey)
+	if selfErrbitApiKey == "" {
+		b := make([]byte, 16)
+		rand.Read(b)
+		selfErrbitApiKey = hex.EncodeToString(b)
+		a.Insert(
+			"Name", selfErrbitName,
+			"ApiKey", selfErrbitApiKey,
+		)().MustExecute()
+	}
+	// make and send error report
+	report := models.NewErrorReport(err, c.Request(), 2)
+	report.Session = map[string]interface{}{
+		"CurrentUser": c.(Ctx).CurrentUser(),
+	}
+	if params != nil {
+		report.Params = params
+	}
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(report)
+	req := httptest.NewRequest("POST", "/", &buf)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Authorization", "Bearer "+selfErrbitApiKey)
+	rec := httptest.NewRecorder()
+	c = c.(Ctx).SetContext(c.Echo().NewContext(req, rec))
+	return noticesCtrl{}.create(c)
 }
 
 func md5String(i string) string {

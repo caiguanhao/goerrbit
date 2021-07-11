@@ -43,6 +43,11 @@ func NewCtxModels(options ...interface{}) CtxModels {
 	}
 }
 
+func (c Ctx) SetContext(ctx echo.Context) Ctx {
+	c.Context = ctx
+	return c
+}
+
 func (c Ctx) MustValidate(i interface{}) {
 	if err := c.Validate(i); err != nil {
 		panic(err)

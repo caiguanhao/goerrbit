@@ -105,7 +105,12 @@ func (main Main) Run() {
 		return
 	}
 
-	e := controllers.New(conn, log, config, frontend.FS)
+	e := (&controllers.Ctrl{
+		DBConn: conn,
+		Logger: log,
+		Config: config,
+		Static: frontend.FS,
+	}).NewEchoServer()
 
 	if *toPrintRoutes {
 		printRoutes(e.Routes())

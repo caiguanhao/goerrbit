@@ -3,6 +3,7 @@ package plugins
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"plugin"
@@ -50,7 +51,11 @@ func (plugin Plugin) CreateNotification(options interface{}, notification map[st
 		m.PermitAllExcept().Filter(options),
 	)
 	i := instance.Elem().Interface().(NotificationService)
-	return i.CreateNotification(notification)
+	err := i.CreateNotification(notification)
+	if err != nil {
+		err = fmt.Errorf("%s: %w", plugin.Name, err)
+	}
+	return err
 }
 
 func (plugins Plugins) FindByName(name string) *Plugin {
@@ -61,6 +66,13 @@ func (plugins Plugins) FindByName(name string) *Plugin {
 		return plugin
 	}
 	return nil
+}
+
+func (plugins Plugins) Names() (names []string) {
+	for _, plugin := range plugins {
+		names = append(names, plugin.Name)
+	}
+	return
 }
 
 func (f pluginNewFunc) ProtectedFields() (fields []string) {

@@ -1,7 +1,12 @@
 package models
 
 import (
+	"fmt"
+	"net/http"
 	"net/url"
+	"os"
+	"runtime"
+	"strings"
 )
 
 type (
@@ -114,4 +119,102 @@ func (r ErrorReport) MakeNotice() Notice {
 		UserAttributes: r.userAttributes(),
 		Framework:      r.Framework,
 	}
+}
+
+func NewErrorReport(err interface{}, req *http.Request, skip int) ErrorReport {
+	packageName, backtrace := getBacktrace(err, skip+1)
+	report := ErrorReport{
+		Errors: []ErrorReportError{
+			{
+				Type:       fmt.Sprintf("%T", err),
+				Message:    fmt.Sprint(err),
+				Backtraces: backtrace,
+			},
+		},
+		Context: map[string]interface{}{
+			"language":     runtime.Version(),
+			"os":           runtime.GOOS,
+			"architecture": runtime.GOARCH,
+			"component":    packageName,
+			"environment":  "production",
+		},
+		Params:      make(map[string]interface{}),
+		Environment: make(map[string]interface{}),
+		Session:     make(map[string]interface{}),
+	}
+	if s, err := os.Hostname(); err == nil {
+		report.Context["hostname"] = s
+	}
+	if wd, err := os.Getwd(); err == nil {
+		report.Context["rootDirectory"] = wd
+	}
+	if req != nil {
+		report.Context["url"] = req.URL.String()
+		if ua := req.Header.Get("User-Agent"); ua != "" {
+			report.Context["userAgent"] = ua
+		}
+		for k, v := range req.Header {
+			if len(v) == 1 {
+				report.Environment[k] = v[0]
+			} else {
+				report.Environment[k] = v
+			}
+		}
+	}
+	return report
+}
+
+// from github.com/airbrake/gobrake
+func getBacktrace(e interface{}, skip int) (string, []ErrorReportBacktrace) {
+	const depth = 32
+	var pcs [depth]uintptr
+	n := runtime.Callers(skip+1, pcs[:])
+	ff := runtime.CallersFrames(pcs[:n])
+
+	var firstPkg string
+	frames := make([]ErrorReportBacktrace, 0)
+	for {
+		f, ok := ff.Next()
+		if !ok {
+			break
+		}
+
+		pkg, fn := splitPackageFuncName(f.Function)
+		if firstPkg == "" && pkg != "runtime" {
+			firstPkg = pkg
+		}
+
+		if stackFilter(pkg, fn, f.File, f.Line) {
+			frames = frames[:0]
+			continue
+		}
+
+		number := f.Line
+		frames = append(frames, ErrorReportBacktrace{
+			File:   f.File,
+			Number: &number,
+			Method: fn,
+		})
+	}
+
+	return firstPkg, frames
+}
+
+// from github.com/airbrake/gobrake
+func stackFilter(packageName, funcName string, file string, line int) bool {
+	return packageName == "runtime" && funcName == "panic"
+}
+
+// from github.com/airbrake/gobrake
+func splitPackageFuncName(funcName string) (string, string) {
+	var packageName string
+	if ind := strings.LastIndex(funcName, "/"); ind > 0 {
+		packageName += funcName[:ind+1]
+		funcName = funcName[ind+1:]
+	}
+	if ind := strings.Index(funcName, "."); ind > 0 {
+		packageName += funcName[:ind]
+		funcName = funcName[ind+1:]
+	}
+	return packageName, funcName
 }
