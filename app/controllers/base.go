@@ -27,6 +27,8 @@ type (
 		Config *configs.Configs
 		Static http.FileSystem
 
+		Version string
+
 		echo      *echo.Echo
 		errNoRows error
 	}
@@ -75,6 +77,13 @@ func (ctrl *Ctrl) NewEchoServer() *echo.Echo {
 			return public(c)
 		})
 	}
+
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) (err error) {
+			c.Response().Header().Set("X-GOERRBIT-VERSION", ctrl.Version)
+			return next(c)
+		}
+	})
 
 	ctrl.echo = e
 

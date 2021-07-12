@@ -106,10 +106,11 @@ func (main Main) Run() {
 	}
 
 	e := (&controllers.Ctrl{
-		DBConn: conn,
-		Logger: log,
-		Config: config,
-		Static: frontend.FS,
+		DBConn:  conn,
+		Logger:  log,
+		Config:  config,
+		Static:  frontend.FS,
+		Version: VERSION,
 	}).NewEchoServer()
 
 	if *toPrintRoutes {
