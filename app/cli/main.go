@@ -60,7 +60,7 @@ func (main Main) Run() {
 		var err error
 		if os.Getenv("FROM_MODELS") == "1" {
 			path, err = migrator.CreateNewMigrationFromModels("app/migrations",
-				psql.NewModel(models.NotificationService{}))
+				psql.NewModel(models.Comment{}))
 		} else {
 			path, err = migrator.CreateNewMigration("app/migrations")
 		}

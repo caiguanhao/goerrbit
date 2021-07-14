@@ -29,6 +29,7 @@ type (
 		ModelUser                *psql.Model
 		ModelUserSession         *psql.Model
 		ModelNotificationService *psql.Model
+		ModelComment             *psql.Model
 	}
 )
 
@@ -40,6 +41,7 @@ func NewCtxModels(options ...interface{}) CtxModels {
 		ModelUser:                psql.NewModel(models.User{}, options...),
 		ModelUserSession:         psql.NewModel(models.UserSession{}, options...),
 		ModelNotificationService: psql.NewModel(models.NotificationService{}, options...),
+		ModelComment:             psql.NewModel(models.Comment{}, options...),
 	}
 }
 
