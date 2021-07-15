@@ -1,6 +1,7 @@
-import { a as axios, u as useToast, o as openBlock, c as createBlock, b as createVNode, w as withCtx, F as Fragment, d as withModifiers, e as createCommentVNode, r as resolveComponent, t as toDisplayString, f as createTextVNode, g as renderList, h as renderSlot, p as pushScopeId, i as popScopeId, j as withDirectives, v as vModelText, k as withScopeId, l as reactive, m as watch, n as format, q as vModelCheckbox, s as vModelRadio, x as vModelSelect, y as vModelDynamic, M as Modal, z as resolveDirective, A as createStaticVNode, N as NProgress, B as createRouter, C as createWebHistory, D as library, E as faThumbsUp, G as faCheckCircle, H as faCheck, I as faTimes, J as faCrown, K as faCaretUp, L as faCaretDown, O as createApp, V as VueToastificationPlugin, P as FontAwesomeIcon } from "./vendor.a98b1d07.js";
+import { r as ref, a as axios, u as useToast, o as openBlock, c as createBlock, b as createVNode, w as withCtx, F as Fragment, d as withModifiers, e as createCommentVNode, t as toDisplayString, f as resolveComponent, g as createTextVNode, h as renderList, i as renderSlot, p as pushScopeId, j as popScopeId, k as withDirectives, v as vModelText, l as withScopeId, m as reactive, n as watch, q as format, s as vModelCheckbox, x as vModelRadio, y as vModelSelect, z as vModelDynamic, M as Modal, A as resolveDirective, P as Popover, T as Tooltip, B as TransitionGroup, C as withKeys, D as createStaticVNode, N as NProgress, E as createRouter, G as createWebHistory, H as library, I as faThumbsUp, J as faCheckCircle, K as faCheck, L as faTimes, O as faCrown, Q as faCaretUp, R as faCaretDown, S as faTrashAlt, U as faEdit, V as createApp, W as VueToastificationPlugin, X as FontAwesomeIcon } from "./vendor.80ff6978.js";
 var bootstrap_min = "";
 var index = "";
+const apiVersion = ref(null);
 const http = axios.create({
   baseURL: "/api/admin",
   withCredentials: true,
@@ -24,16 +25,34 @@ http.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 http.interceptors.response.use((res) => {
+  if (res.headers && res.headers["x-goerrbit-version"]) {
+    apiVersion.value = res.headers["x-goerrbit-version"];
+  }
   return res;
 }, (error) => {
-  if (error && error.response && error.response.status === 403) {
-    useToast().error("No permission");
-    error.toastShown = true;
+  if (error && error.response) {
+    let res = error.response;
+    if (res.status === 403) {
+      useToast().error("No permission");
+      error.toastShown = true;
+    }
+    if (res.headers && res.headers["x-goerrbit-version"]) {
+      apiVersion.value = res.headers["x-goerrbit-version"];
+    }
   }
   return Promise.reject(error);
 });
+http.apiVersion = apiVersion;
 var App_vue_vue_type_style_index_0_lang = "";
-const _sfc_main$n = {
+const _sfc_main$p = {
+  computed: {
+    name() {
+      if (http.apiVersion.value) {
+        return `goerrbit ${http.apiVersion.value}`;
+      }
+      return "goerrbit";
+    }
+  },
   methods: {
     signOut() {
       http.post("/sign-out").then((res) => {
@@ -67,8 +86,8 @@ const _sfc_main$n = {
       while (el) {
         let node = el.nodeName;
         if (node === "A" || node === "BUTTON" || node === "INPUT") {
-          if (node === "A") {
-            let path = el.pathname + el.search;
+          if (node === "A" && el.getAttribute("href")) {
+            let path = el.pathname + el.search + el.hash;
             if (this.$route.fullPath === path) {
               this.$router.replace({
                 name: "RouteBlank"
@@ -123,10 +142,10 @@ function clickBetween(a, b) {
   }
   return true;
 }
-const _hoisted_1$j = { class: "navbar navbar-expand-md navbar-dark fixed-top bg-dark" };
-const _hoisted_2$g = { class: "container-fluid" };
-const _hoisted_3$g = /* @__PURE__ */ createTextVNode("Errbit");
-const _hoisted_4$g = /* @__PURE__ */ createVNode("button", {
+const _hoisted_1$l = { class: "navbar navbar-expand-md navbar-dark fixed-top bg-dark" };
+const _hoisted_2$i = { class: "container-fluid" };
+const _hoisted_3$i = /* @__PURE__ */ createTextVNode("Errbit");
+const _hoisted_4$i = /* @__PURE__ */ createVNode("button", {
   class: "navbar-toggler",
   type: "button",
   "data-bs-toggle": "collapse",
@@ -137,15 +156,15 @@ const _hoisted_4$g = /* @__PURE__ */ createVNode("button", {
 }, [
   /* @__PURE__ */ createVNode("span", { class: "navbar-toggler-icon" })
 ], -1);
-const _hoisted_5$g = {
+const _hoisted_5$h = {
   class: "collapse navbar-collapse",
   id: "navbarCollapse"
 };
-const _hoisted_6$d = { class: "navbar-nav me-auto mb-2 mb-md-0" };
-const _hoisted_7$d = { class: "nav-item" };
-const _hoisted_8$d = /* @__PURE__ */ createTextVNode("Apps");
-const _hoisted_9$c = { class: "nav-item" };
-const _hoisted_10$b = /* @__PURE__ */ createTextVNode("Errors");
+const _hoisted_6$e = { class: "navbar-nav me-auto mb-2 mb-md-0" };
+const _hoisted_7$e = { class: "nav-item" };
+const _hoisted_8$e = /* @__PURE__ */ createTextVNode("Apps");
+const _hoisted_9$d = { class: "nav-item" };
+const _hoisted_10$c = /* @__PURE__ */ createTextVNode("Errors");
 const _hoisted_11$9 = { class: "nav-item" };
 const _hoisted_12$8 = /* @__PURE__ */ createTextVNode("Users");
 const _hoisted_13$7 = { class: "navbar-nav mb-2 mb-md-0" };
@@ -153,57 +172,49 @@ const _hoisted_14$7 = { class: "nav-item" };
 const _hoisted_15$6 = { class: "nav-item" };
 const _hoisted_16$6 = { class: "flex-shrink-0" };
 const _hoisted_17$6 = { class: "container" };
-const _hoisted_18$6 = /* @__PURE__ */ createVNode("footer", { class: "footer mt-auto py-3 bg-light" }, [
-  /* @__PURE__ */ createVNode("div", { class: "container" }, [
-    /* @__PURE__ */ createVNode("span", { class: "text-muted" }, [
-      /* @__PURE__ */ createVNode("a", {
-        href: "https://github.com/caiguanhao/goerrbit",
-        target: "_blank"
-      }, "goerrbit")
-    ])
-  ])
-], -1);
-function _sfc_render$l(_ctx, _cache, $props, $setup, $data, $options) {
+const _hoisted_18$6 = { class: "footer mt-auto py-3 bg-light" };
+const _hoisted_19$5 = { class: "container" };
+function _sfc_render$o(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_router_link = resolveComponent("router-link");
   const _component_faicon = resolveComponent("faicon");
   const _component_router_view = resolveComponent("router-view");
   return openBlock(), createBlock(Fragment, null, [
     createVNode("header", null, [
-      createVNode("nav", _hoisted_1$j, [
-        createVNode("div", _hoisted_2$g, [
+      createVNode("nav", _hoisted_1$l, [
+        createVNode("div", _hoisted_2$i, [
           createVNode(_component_router_link, {
             class: "navbar-brand",
             to: { name: "RouteHome" }
           }, {
             default: withCtx(() => [
-              _hoisted_3$g
+              _hoisted_3$i
             ]),
             _: 1
           }),
           _ctx.currentUser.Id ? (openBlock(), createBlock(Fragment, { key: 0 }, [
-            _hoisted_4$g,
-            createVNode("div", _hoisted_5$g, [
-              createVNode("ul", _hoisted_6$d, [
-                createVNode("li", _hoisted_7$d, [
+            _hoisted_4$i,
+            createVNode("div", _hoisted_5$h, [
+              createVNode("ul", _hoisted_6$e, [
+                createVNode("li", _hoisted_7$e, [
                   createVNode(_component_router_link, {
                     class: "nav-link",
                     "active-class": "active",
                     to: { name: "RouteHome" }
                   }, {
                     default: withCtx(() => [
-                      _hoisted_8$d
+                      _hoisted_8$e
                     ]),
                     _: 1
                   })
                 ]),
-                createVNode("li", _hoisted_9$c, [
+                createVNode("li", _hoisted_9$d, [
                   createVNode(_component_router_link, {
                     class: "nav-link",
                     "active-class": "active",
                     to: { name: "RouteProblems" }
                   }, {
                     default: withCtx(() => [
-                      _hoisted_10$b
+                      _hoisted_10$c
                     ]),
                     _: 1
                   })
@@ -259,15 +270,25 @@ function _sfc_render$l(_ctx, _cache, $props, $setup, $data, $options) {
         createVNode(_component_router_view)
       ])
     ]),
-    _hoisted_18$6
+    createVNode("footer", _hoisted_18$6, [
+      createVNode("div", _hoisted_19$5, [
+        createVNode("a", {
+          class: "text-muted text-decoration-none small",
+          href: "https://github.com/caiguanhao/goerrbit",
+          target: "_blank",
+          textContent: toDisplayString($options.name)
+        }, null, 8, ["textContent"])
+      ])
+    ])
   ], 64);
 }
-_sfc_main$n.render = _sfc_render$l;
+_sfc_main$p.render = _sfc_render$o;
 var nprogress = "";
 var pagination_vue_vue_type_style_index_0_lang = "";
-const _sfc_main$m = {
+const _sfc_main$o = {
   props: {
-    pagination: Object
+    pagination: Object,
+    hash: String
   },
   computed: {
     pages() {
@@ -307,33 +328,33 @@ const _sfc_main$m = {
     }
   }
 };
-const _hoisted_1$i = { class: "pagination justify-content-center" };
-const _hoisted_2$f = /* @__PURE__ */ createTextVNode("Previous");
-const _hoisted_3$f = {
+const _hoisted_1$k = { class: "pagination justify-content-center" };
+const _hoisted_2$h = /* @__PURE__ */ createTextVNode("Previous");
+const _hoisted_3$h = {
   key: 1,
   class: "page-link"
 };
-const _hoisted_4$f = /* @__PURE__ */ createTextVNode("Next");
-const _hoisted_5$f = {
+const _hoisted_4$h = /* @__PURE__ */ createTextVNode("Next");
+const _hoisted_5$g = {
   key: 1,
   class: "page-link"
 };
-function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
+function _sfc_render$n(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_router_link = resolveComponent("router-link");
-  return openBlock(), createBlock("ul", _hoisted_1$i, [
+  return openBlock(), createBlock("ul", _hoisted_1$k, [
     createVNode("li", {
       class: ["page-item", { disabled: !$props.pagination.PrevPage }]
     }, [
       $props.pagination.PrevPage ? (openBlock(), createBlock(_component_router_link, {
         key: 0,
         class: "page-link",
-        to: { query: $options.queryForPage($props.pagination.PrevPage) }
+        to: { hash: $props.hash, query: $options.queryForPage($props.pagination.PrevPage) }
       }, {
         default: withCtx(() => [
-          _hoisted_2$f
+          _hoisted_2$h
         ]),
         _: 1
-      }, 8, ["to"])) : (openBlock(), createBlock("span", _hoisted_3$f, "Previous"))
+      }, 8, ["to"])) : (openBlock(), createBlock("span", _hoisted_3$h, "Previous"))
     ], 2),
     (openBlock(true), createBlock(Fragment, null, renderList($options.pages, (page) => {
       return openBlock(), createBlock("li", {
@@ -349,7 +370,7 @@ function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
         }, null, 8, ["textContent"])) : (openBlock(), createBlock(_component_router_link, {
           key: 1,
           class: "page-link",
-          to: { query: $options.queryForPage(page) },
+          to: { hash: $props.hash, query: $options.queryForPage(page) },
           textContent: toDisplayString(page)
         }, null, 8, ["to", "textContent"]))
       ], 2);
@@ -360,18 +381,18 @@ function _sfc_render$k(_ctx, _cache, $props, $setup, $data, $options) {
       $props.pagination.NextPage ? (openBlock(), createBlock(_component_router_link, {
         key: 0,
         class: "page-link",
-        to: { query: $options.queryForPage($props.pagination.NextPage) }
+        to: { hash: $props.hash, query: $options.queryForPage($props.pagination.NextPage) }
       }, {
         default: withCtx(() => [
-          _hoisted_4$f
+          _hoisted_4$h
         ]),
         _: 1
-      }, 8, ["to"])) : (openBlock(), createBlock("span", _hoisted_5$f, "Next"))
+      }, 8, ["to"])) : (openBlock(), createBlock("span", _hoisted_5$g, "Next"))
     ], 2)
   ]);
 }
-_sfc_main$m.render = _sfc_render$k;
-const _sfc_main$l = {
+_sfc_main$o.render = _sfc_render$n;
+const _sfc_main$n = {
   props: {
     sort: String,
     defaultOrder: String,
@@ -397,7 +418,7 @@ const _sfc_main$l = {
     }
   }
 };
-function _sfc_render$j(_ctx, _cache, $props, $setup, $data, $options) {
+function _sfc_render$m(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_faicon = resolveComponent("faicon");
   const _component_router_link = resolveComponent("router-link");
   return openBlock(), createBlock(_component_router_link, { to: $options.to }, {
@@ -412,9 +433,9 @@ function _sfc_render$j(_ctx, _cache, $props, $setup, $data, $options) {
     _: 3
   }, 8, ["to"]);
 }
-_sfc_main$l.render = _sfc_render$j;
+_sfc_main$n.render = _sfc_render$m;
 var index_vue_vue_type_style_index_0_scoped_true_lang$3 = "";
-const _sfc_main$k = {
+const _sfc_main$m = {
   data() {
     return {
       apps: [],
@@ -424,8 +445,8 @@ const _sfc_main$k = {
     };
   },
   components: {
-    Pagination: _sfc_main$m,
-    SortButton: _sfc_main$l
+    Pagination: _sfc_main$o,
+    SortButton: _sfc_main$n
   },
   computed: {
     isSearch() {
@@ -479,56 +500,56 @@ const _sfc_main$k = {
     }, next);
   }
 };
-const _withId$f = /* @__PURE__ */ withScopeId();
+const _withId$g = /* @__PURE__ */ withScopeId();
 pushScopeId("data-v-8182bf82");
-const _hoisted_1$h = { class: "p-3 bg-light border rounded-3 mb-4 d-sm-flex align-items-center justify-content-between" };
-const _hoisted_2$e = /* @__PURE__ */ createVNode("div", { class: "mb-3 mb-sm-0" }, [
+const _hoisted_1$j = { class: "p-3 bg-light border rounded-3 mb-4 d-sm-flex align-items-center justify-content-between" };
+const _hoisted_2$g = /* @__PURE__ */ createVNode("div", { class: "mb-3 mb-sm-0" }, [
   /* @__PURE__ */ createVNode("h4", null, "Apps")
 ], -1);
-const _hoisted_3$e = /* @__PURE__ */ createTextVNode("Add a New App");
-const _hoisted_4$e = {
+const _hoisted_3$g = /* @__PURE__ */ createTextVNode("Add a New App");
+const _hoisted_4$g = {
   key: 0,
   class: "mb-0 text-muted"
 };
-const _hoisted_5$e = { class: "d-sm-flex align-items-center justify-content-end" };
-const _hoisted_6$c = { class: "input-group" };
-const _hoisted_7$c = /* @__PURE__ */ createVNode("button", {
+const _hoisted_5$f = { class: "d-sm-flex align-items-center justify-content-end" };
+const _hoisted_6$d = { class: "input-group" };
+const _hoisted_7$d = /* @__PURE__ */ createVNode("button", {
   class: "btn btn-outline-secondary",
   type: "submit"
 }, "Search", -1);
-const _hoisted_8$c = { class: "table-responsive" };
-const _hoisted_9$b = { class: "table" };
-const _hoisted_10$a = /* @__PURE__ */ createTextVNode("NAME");
+const _hoisted_8$d = { class: "table-responsive" };
+const _hoisted_9$c = { class: "table" };
+const _hoisted_10$b = /* @__PURE__ */ createTextVNode("NAME");
 const _hoisted_11$8 = /* @__PURE__ */ createVNode("th", { width: "20%" }, "NOTIFY", -1);
 const _hoisted_12$7 = /* @__PURE__ */ createVNode("th", { width: "20%" }, "ERRORS", -1);
 popScopeId();
-const _sfc_render$i = /* @__PURE__ */ _withId$f((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$l = /* @__PURE__ */ _withId$g((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_router_link = resolveComponent("router-link");
   const _component_SortButton = resolveComponent("SortButton");
   const _component_Pagination = resolveComponent("Pagination");
   return openBlock(), createBlock(Fragment, null, [
-    createVNode("div", _hoisted_1$h, [
-      _hoisted_2$e,
+    createVNode("div", _hoisted_1$j, [
+      _hoisted_2$g,
       createVNode("div", null, [
         _ctx.currentUser.IsAdmin ? (openBlock(), createBlock(_component_router_link, {
           key: 0,
           to: { name: "RouteAppsNew" },
           class: "btn btn-primary"
         }, {
-          default: _withId$f(() => [
-            _hoisted_3$e
+          default: _withId$g(() => [
+            _hoisted_3$g
           ]),
           _: 1
         })) : createCommentVNode("", true)
       ])
     ]),
-    $data.pagination.TotalCount === 0 && !$options.isSearch ? (openBlock(), createBlock("h5", _hoisted_4$e, "No apps have been created yet")) : (openBlock(), createBlock(Fragment, { key: 1 }, [
-      createVNode("div", _hoisted_5$e, [
+    $data.pagination.TotalCount === 0 && !$options.isSearch ? (openBlock(), createBlock("h5", _hoisted_4$g, "No apps have been created yet")) : (openBlock(), createBlock(Fragment, { key: 1 }, [
+      createVNode("div", _hoisted_5$f, [
         createVNode("form", {
           class: "mb-3",
           onSubmit: _cache[2] || (_cache[2] = withModifiers((...args) => $options.search && $options.search(...args), ["prevent"]))
         }, [
-          createVNode("div", _hoisted_6$c, [
+          createVNode("div", _hoisted_6$d, [
             withDirectives(createVNode("input", {
               type: "text",
               class: "form-control",
@@ -536,12 +557,12 @@ const _sfc_render$i = /* @__PURE__ */ _withId$f((_ctx, _cache, $props, $setup, $
             }, null, 512), [
               [vModelText, $data.query]
             ]),
-            _hoisted_7$c
+            _hoisted_7$d
           ])
         ], 32)
       ]),
-      createVNode("div", _hoisted_8$c, [
-        createVNode("table", _hoisted_9$b, [
+      createVNode("div", _hoisted_8$d, [
+        createVNode("table", _hoisted_9$c, [
           createVNode("thead", null, [
             createVNode("tr", null, [
               createVNode("th", null, [
@@ -549,8 +570,8 @@ const _sfc_render$i = /* @__PURE__ */ _withId$f((_ctx, _cache, $props, $setup, $
                   sort: "name",
                   pagination: $data.pagination
                 }, {
-                  default: _withId$f(() => [
-                    _hoisted_10$a
+                  default: _withId$g(() => [
+                    _hoisted_10$b
                   ]),
                   _: 1
                 }, 8, ["pagination"])
@@ -595,8 +616,8 @@ const _sfc_render$i = /* @__PURE__ */ _withId$f((_ctx, _cache, $props, $setup, $
     ], 64))
   ], 64);
 });
-_sfc_main$k.render = _sfc_render$i;
-_sfc_main$k.__scopeId = "data-v-8182bf82";
+_sfc_main$m.render = _sfc_render$l;
+_sfc_main$m.__scopeId = "data-v-8182bf82";
 var problems_vue_vue_type_style_index_0_scoped_true_lang = "";
 let show = window.sessionStorage ? window.sessionStorage.getItem("selections.show") === "1" : false;
 const selections = reactive({
@@ -612,11 +633,9 @@ watch(() => selections.show, (val) => {
     window.sessionStorage.removeItem("selections.show");
   }
 });
-const _sfc_main$j = {
+const _sfc_main$l = {
   props: {
-    apps: Array,
-    problems: Array,
-    pagination: Object,
+    response: Object,
     showingResolved: {
       type: Boolean,
       default: false
@@ -626,8 +645,8 @@ const _sfc_main$j = {
     "reload"
   ],
   components: {
-    Pagination: _sfc_main$m,
-    SortButton: _sfc_main$l
+    Pagination: _sfc_main$o,
+    SortButton: _sfc_main$n
   },
   data() {
     return {
@@ -659,10 +678,19 @@ const _sfc_main$j = {
     }
   },
   computed: {
+    apps() {
+      return this.response.Apps || [];
+    },
+    comments() {
+      return this.response.Comments || [];
+    },
+    problems() {
+      return this.response.Problems || [];
+    },
+    pagination() {
+      return this.response.Pagination || {};
+    },
     appNames() {
-      if (!this.apps) {
-        return null;
-      }
       let map = {};
       for (let i = 0; i < this.apps.length; i++) {
         map[this.apps[i].Id] = this.apps[i].Name;
@@ -689,6 +717,9 @@ const _sfc_main$j = {
     }
   },
   methods: {
+    commentFor(problemId) {
+      return this.comments.find((c) => c.ProblemId === problemId);
+    },
     timeago(time) {
       return format(time);
     },
@@ -810,19 +841,19 @@ const _sfc_main$j = {
     }
   }
 };
-const _withId$e = /* @__PURE__ */ withScopeId();
-pushScopeId("data-v-0f2d0340");
-const _hoisted_1$g = {
+const _withId$f = /* @__PURE__ */ withScopeId();
+pushScopeId("data-v-5a66a3f8");
+const _hoisted_1$i = {
   key: 0,
   class: "d-flex justify-content-center mb-3"
 };
-const _hoisted_2$d = { class: "bg-dark text-white py-2 px-3 rounded-3" };
-const _hoisted_3$d = {
+const _hoisted_2$f = { class: "bg-dark text-white py-2 px-3 rounded-3" };
+const _hoisted_3$f = {
   key: 0,
   class: "mb-0 text-muted"
 };
-const _hoisted_4$d = { class: "btn-group btn-group-sm" };
-const _hoisted_5$d = /* @__PURE__ */ createVNode("button", {
+const _hoisted_4$f = { class: "btn-group btn-group-sm" };
+const _hoisted_5$e = /* @__PURE__ */ createVNode("button", {
   type: "button",
   class: "btn btn-secondary dropdown-toggle dropdown-toggle-split",
   "data-bs-toggle": "dropdown",
@@ -830,13 +861,13 @@ const _hoisted_5$d = /* @__PURE__ */ createVNode("button", {
 }, [
   /* @__PURE__ */ createVNode("span", { class: "visually-hidden" }, "Toggle Dropdown")
 ], -1);
-const _hoisted_6$b = { class: "dropdown-menu" };
-const _hoisted_7$b = /* @__PURE__ */ createVNode("li", null, [
+const _hoisted_6$c = { class: "dropdown-menu" };
+const _hoisted_7$c = /* @__PURE__ */ createVNode("li", null, [
   /* @__PURE__ */ createVNode("hr", { class: "dropdown-divider" })
 ], -1);
-const _hoisted_8$b = { class: "d-flex justify-content-between" };
-const _hoisted_9$a = { key: 0 };
-const _hoisted_10$9 = { key: 1 };
+const _hoisted_8$c = { class: "d-flex justify-content-between" };
+const _hoisted_9$b = { key: 0 };
+const _hoisted_10$a = { key: 1 };
 const _hoisted_11$7 = { class: "table-responsive" };
 const _hoisted_12$6 = { class: "table" };
 const _hoisted_13$6 = {
@@ -864,14 +895,14 @@ const _hoisted_27$3 = {
   class: "text-success fst-italic"
 };
 popScopeId();
-const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$k = /* @__PURE__ */ _withId$f((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_SortButton = resolveComponent("SortButton");
   const _component_router_link = resolveComponent("router-link");
   const _component_faicon = resolveComponent("faicon");
   const _component_Pagination = resolveComponent("Pagination");
   return openBlock(), createBlock(Fragment, null, [
-    $options.hasUndo ? (openBlock(), createBlock("div", _hoisted_1$g, [
-      createVNode("span", _hoisted_2$d, [
+    $options.hasUndo ? (openBlock(), createBlock("div", _hoisted_1$i, [
+      createVNode("span", _hoisted_2$f, [
         createVNode("span", {
           textContent: toDisplayString(`${$data.updated.ids.length} problems marked as ${$data.updated.type === "resolved" ? "resolved" : "unresolved"}.`)
         }, null, 8, ["textContent"]),
@@ -883,17 +914,17 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
       ])
     ])) : createCommentVNode("", true),
     $options.hasNoProblems ? (openBlock(), createBlock(Fragment, { key: 1 }, [
-      $options.isSearch ? (openBlock(), createBlock("h5", _hoisted_3$d, "No errors matched your query")) : renderSlot(_ctx.$slots, "default", { key: 1 }, void 0, true)
+      $options.isSearch ? (openBlock(), createBlock("h5", _hoisted_3$f, "No errors matched your query")) : renderSlot(_ctx.$slots, "default", { key: 1 }, void 0, true)
     ], 64)) : (openBlock(), createBlock(Fragment, { key: 2 }, [
-      createVNode("div", _hoisted_4$d, [
+      createVNode("div", _hoisted_4$f, [
         createVNode("button", {
           type: "button",
           class: "btn btn-secondary",
           onClick: _cache[2] || (_cache[2] = withModifiers(($event) => $data.selections.show = !$data.selections.show, ["prevent"])),
           textContent: toDisplayString($data.selections.show ? "Selection: ON" : "Selection: OFF")
         }, null, 8, ["textContent"]),
-        _hoisted_5$d,
-        createVNode("ul", _hoisted_6$b, [
+        _hoisted_5$e,
+        createVNode("ul", _hoisted_6$c, [
           createVNode("li", null, [
             createVNode("a", {
               class: "dropdown-item",
@@ -901,8 +932,8 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
               onClick: _cache[3] || (_cache[3] = withModifiers(($event) => $options.selectAll(), ["prevent"]))
             }, "Select All On This Page")
           ]),
-          _hoisted_7$b,
-          createVNode("li", _hoisted_8$b, [
+          _hoisted_7$c,
+          createVNode("li", _hoisted_8$c, [
             createVNode("h6", {
               class: "dropdown-header",
               textContent: toDisplayString(`SELECTED: ${$data.selections.problemIds.length}`)
@@ -914,13 +945,13 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
               onClick: _cache[4] || (_cache[4] = withModifiers(($event) => $options.clear(), ["prevent"]))
             }, "Clear")) : createCommentVNode("", true)
           ]),
-          $props.showingResolved ? (openBlock(), createBlock("li", _hoisted_9$a, [
+          $props.showingResolved ? (openBlock(), createBlock("li", _hoisted_9$b, [
             createVNode("a", {
               class: ["dropdown-item", { disabled: !$data.selections.problemIds.length }],
               href: "",
               onClick: _cache[5] || (_cache[5] = withModifiers(($event) => $options.setAsUnresolved(), ["prevent"]))
             }, "Mark As Unresolved", 2)
-          ])) : (openBlock(), createBlock("li", _hoisted_10$9, [
+          ])) : (openBlock(), createBlock("li", _hoisted_10$a, [
             createVNode("a", {
               class: ["dropdown-item", { disabled: !$data.selections.problemIds.length }],
               href: "",
@@ -956,15 +987,15 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
             createVNode("tr", null, [
               $data.selections.show ? (openBlock(), createBlock("th", _hoisted_13$6)) : createCommentVNode("", true),
               createVNode("th", _hoisted_14$6, [
-                $props.apps ? (openBlock(), createBlock("div", _hoisted_15$5, "APP")) : (openBlock(), createBlock("div", _hoisted_16$5, "ENV"))
+                $options.apps ? (openBlock(), createBlock("div", _hoisted_15$5, "APP")) : (openBlock(), createBlock("div", _hoisted_16$5, "ENV"))
               ]),
               createVNode("th", null, [
                 createVNode(_component_SortButton, {
                   sort: "message",
                   defaultOrder: "asc",
-                  pagination: $props.pagination
+                  pagination: $options.pagination
                 }, {
-                  default: _withId$e(() => [
+                  default: _withId$f(() => [
                     _hoisted_17$5
                   ]),
                   _: 1
@@ -973,9 +1004,9 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
               createVNode("th", _hoisted_18$5, [
                 createVNode(_component_SortButton, {
                   sort: "last_notice_at",
-                  pagination: $props.pagination
+                  pagination: $options.pagination
                 }, {
-                  default: _withId$e(() => [
+                  default: _withId$f(() => [
                     _hoisted_19$4
                   ]),
                   _: 1
@@ -984,9 +1015,9 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
               createVNode("th", _hoisted_20$4, [
                 createVNode(_component_SortButton, {
                   sort: "notices_count",
-                  pagination: $props.pagination
+                  pagination: $options.pagination
                 }, {
-                  default: _withId$e(() => [
+                  default: _withId$f(() => [
                     _hoisted_21$3
                   ]),
                   _: 1
@@ -996,7 +1027,7 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
             ])
           ]),
           createVNode("tbody", null, [
-            (openBlock(true), createBlock(Fragment, null, renderList($props.problems, (problem) => {
+            (openBlock(true), createBlock(Fragment, null, renderList($options.problems, (problem) => {
               return openBlock(), createBlock("tr", {
                 class: ["clickable-row", {
                   highlighted: $data.lastProblemId === problem.Id,
@@ -1014,7 +1045,7 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
                   ])
                 ])) : createCommentVNode("", true),
                 createVNode("td", null, [
-                  $props.apps ? (openBlock(), createBlock("div", _hoisted_24$3, [
+                  $options.apps ? (openBlock(), createBlock("div", _hoisted_24$3, [
                     createVNode(_component_router_link, {
                       to: { name: "RouteAppsShow", params: { id: problem.AppId } },
                       class: "app-name",
@@ -1038,12 +1069,29 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
                   createVNode(_component_router_link, {
                     to: { name: "RouteProblemsShow", params: { id: problem.AppId, pid: problem.Id } },
                     class: "clickable-row-target message text-break",
-                    textContent: toDisplayString(problem.Message)
+                    textContent: toDisplayString(problem.Message || "(empty)")
                   }, null, 8, ["to", "textContent"]),
-                  createVNode("div", {
+                  problem.Location ? (openBlock(), createBlock("div", {
+                    key: 0,
                     class: "small fst-italic text-muted",
                     textContent: toDisplayString(problem.Location)
-                  }, null, 8, ["textContent"])
+                  }, null, 8, ["textContent"])) : createCommentVNode("", true),
+                  $options.commentFor(problem.Id) ? (openBlock(), createBlock(_component_router_link, {
+                    key: 1,
+                    to: { name: "RouteProblemsShow", params: { id: problem.AppId, pid: problem.Id }, hash: "#comments" },
+                    class: "comment-btn"
+                  }, {
+                    default: _withId$f(() => [
+                      createVNode("strong", {
+                        textContent: toDisplayString($options.commentFor(problem.Id).UserName + ":")
+                      }, null, 8, ["textContent"]),
+                      createVNode("span", {
+                        class: "ms-2",
+                        textContent: toDisplayString($options.commentFor(problem.Id).Body)
+                      }, null, 8, ["textContent"])
+                    ]),
+                    _: 2
+                  }, 1032, ["to"])) : createCommentVNode("", true)
                 ]),
                 createVNode("td", null, [
                   createVNode("div", {
@@ -1072,16 +1120,16 @@ const _sfc_render$h = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $
           ])
         ])
       ]),
-      $props.pagination.TotalPages > 1 ? (openBlock(), createBlock(_component_Pagination, {
+      $options.pagination.TotalPages > 1 ? (openBlock(), createBlock(_component_Pagination, {
         key: 0,
-        pagination: $props.pagination
+        pagination: $options.pagination
       }, null, 8, ["pagination"])) : createCommentVNode("", true)
     ], 64))
   ], 64);
 });
-_sfc_main$j.render = _sfc_render$h;
-_sfc_main$j.__scopeId = "data-v-0f2d0340";
-const _sfc_main$i = {
+_sfc_main$l.render = _sfc_render$k;
+_sfc_main$l.__scopeId = "data-v-5a66a3f8";
+const _sfc_main$k = {
   data() {
     return {
       query: null
@@ -1108,22 +1156,22 @@ const _sfc_main$i = {
     }
   }
 };
-const _hoisted_1$f = { class: "d-sm-flex align-items-center justify-content-between" };
-const _hoisted_2$c = { class: "btn-group mb-3" };
-const _hoisted_3$c = { class: "dropdown-menu" };
-const _hoisted_4$c = { key: 0 };
-const _hoisted_5$c = /* @__PURE__ */ createTextVNode("Unresolved Errors");
-const _hoisted_6$a = { key: 1 };
-const _hoisted_7$a = /* @__PURE__ */ createTextVNode("Resolved Errors");
-const _hoisted_8$a = { class: "input-group" };
-const _hoisted_9$9 = /* @__PURE__ */ createVNode("button", {
+const _hoisted_1$h = { class: "d-sm-flex align-items-center justify-content-between" };
+const _hoisted_2$e = { class: "btn-group mb-3" };
+const _hoisted_3$e = { class: "dropdown-menu" };
+const _hoisted_4$e = { key: 0 };
+const _hoisted_5$d = /* @__PURE__ */ createTextVNode("Unresolved Errors");
+const _hoisted_6$b = { key: 1 };
+const _hoisted_7$b = /* @__PURE__ */ createTextVNode("Resolved Errors");
+const _hoisted_8$b = { class: "input-group" };
+const _hoisted_9$a = /* @__PURE__ */ createVNode("button", {
   class: "btn btn-outline-secondary",
   type: "submit"
 }, "Search", -1);
-function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
+function _sfc_render$j(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_router_link = resolveComponent("router-link");
-  return openBlock(), createBlock("div", _hoisted_1$f, [
-    createVNode("div", _hoisted_2$c, [
+  return openBlock(), createBlock("div", _hoisted_1$h, [
+    createVNode("div", _hoisted_2$e, [
       createVNode("button", {
         class: "btn btn-outline-secondary dropdown-toggle",
         type: "button",
@@ -1131,24 +1179,24 @@ function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
         "aria-expanded": "false",
         textContent: toDisplayString(_ctx.$route.query.status === "resolved" ? "Resolved Errors" : "Unresolved Errors")
       }, null, 8, ["textContent"]),
-      createVNode("ul", _hoisted_3$c, [
-        _ctx.$route.query.status === "resolved" ? (openBlock(), createBlock("li", _hoisted_4$c, [
+      createVNode("ul", _hoisted_3$e, [
+        _ctx.$route.query.status === "resolved" ? (openBlock(), createBlock("li", _hoisted_4$e, [
           createVNode(_component_router_link, {
             class: "dropdown-item",
             to: { query: { query: _ctx.$route.query.query } }
           }, {
             default: withCtx(() => [
-              _hoisted_5$c
+              _hoisted_5$d
             ]),
             _: 1
           }, 8, ["to"])
-        ])) : (openBlock(), createBlock("li", _hoisted_6$a, [
+        ])) : (openBlock(), createBlock("li", _hoisted_6$b, [
           createVNode(_component_router_link, {
             class: "dropdown-item",
             to: { query: { query: _ctx.$route.query.query, status: "resolved" } }
           }, {
             default: withCtx(() => [
-              _hoisted_7$a
+              _hoisted_7$b
             ]),
             _: 1
           }, 8, ["to"])
@@ -1159,7 +1207,7 @@ function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
       class: "mb-3",
       onSubmit: _cache[2] || (_cache[2] = withModifiers((...args) => $options.search && $options.search(...args), ["prevent"]))
     }, [
-      createVNode("div", _hoisted_8$a, [
+      createVNode("div", _hoisted_8$b, [
         withDirectives(createVNode("input", {
           type: "text",
           class: "form-control",
@@ -1167,23 +1215,22 @@ function _sfc_render$g(_ctx, _cache, $props, $setup, $data, $options) {
         }, null, 512), [
           [vModelText, $data.query]
         ]),
-        _hoisted_9$9
+        _hoisted_9$a
       ])
     ], 32)
   ]);
 }
-_sfc_main$i.render = _sfc_render$g;
+_sfc_main$k.render = _sfc_render$j;
 var show_vue_vue_type_style_index_0_scoped_true_lang$1 = "";
-const _sfc_main$h = {
+const _sfc_main$j = {
   components: {
-    Problems: _sfc_main$j,
-    ProblemsHeader: _sfc_main$i
+    Problems: _sfc_main$l,
+    ProblemsHeader: _sfc_main$k
   },
   data() {
     return {
       app: {},
-      problems: [],
-      pagination: {}
+      response: {}
     };
   },
   computed: {
@@ -1217,8 +1264,7 @@ end`;
       http.get(`/apps/${this.$route.params.id}/problems`, {
         params: this.$route.query
       }).then((res) => {
-        this.problems = res.data.Problems;
-        this.pagination = res.data.Pagination;
+        this.response = res.data;
         this.load();
       });
     }
@@ -1230,8 +1276,7 @@ end`;
     ]).then((res) => {
       next((vm2) => {
         vm2.app = res[0].data.App;
-        vm2.problems = res[1].data.Problems;
-        vm2.pagination = res[1].data.Pagination;
+        vm2.response = res[1].data;
         vm2.load();
       });
     }, next);
@@ -1242,48 +1287,47 @@ end`;
       http.get(`/apps/${to.params.id}/problems`, { params: to.query })
     ]).then((res) => {
       this.app = res[0].data.App;
-      this.problems = res[1].data.Problems;
-      this.pagination = res[1].data.Pagination;
+      this.response = res[1].data;
       this.load();
       next();
     }, next);
   }
 };
-const _withId$d = /* @__PURE__ */ withScopeId();
-pushScopeId("data-v-f5d21916");
-const _hoisted_1$e = { class: "p-3 bg-light border rounded-3 mb-4 d-sm-flex align-items-center justify-content-between" };
-const _hoisted_2$b = { class: "mb-3 mb-sm-0" };
-const _hoisted_3$b = { class: "small" };
-const _hoisted_4$b = /* @__PURE__ */ createVNode("strong", null, "Errors Caught:", -1);
-const _hoisted_5$b = /* @__PURE__ */ createTextVNode();
-const _hoisted_6$9 = /* @__PURE__ */ createVNode("strong", { class: "ms-3" }, "API Key:", -1);
-const _hoisted_7$9 = /* @__PURE__ */ createTextVNode();
-const _hoisted_8$9 = /* @__PURE__ */ createTextVNode("Edit");
-const _hoisted_9$8 = {
+const _withId$e = /* @__PURE__ */ withScopeId();
+pushScopeId("data-v-776eddcc");
+const _hoisted_1$g = { class: "p-3 bg-light border rounded-3 mb-4 d-sm-flex align-items-center justify-content-between" };
+const _hoisted_2$d = { class: "mb-3 mb-sm-0" };
+const _hoisted_3$d = { class: "small" };
+const _hoisted_4$d = /* @__PURE__ */ createVNode("strong", null, "Errors Caught:", -1);
+const _hoisted_5$c = /* @__PURE__ */ createTextVNode();
+const _hoisted_6$a = /* @__PURE__ */ createVNode("strong", { class: "ms-3" }, "API Key:", -1);
+const _hoisted_7$a = /* @__PURE__ */ createTextVNode();
+const _hoisted_8$a = /* @__PURE__ */ createTextVNode("Edit");
+const _hoisted_9$9 = {
   key: 0,
   class: "mb-0 text-muted"
 };
-const _hoisted_10$8 = /* @__PURE__ */ createVNode("h5", { class: "mb-3 text-muted" }, "No errors have been caught yet, make sure you set up your app", -1);
+const _hoisted_10$9 = /* @__PURE__ */ createVNode("h5", { class: "mb-3 text-muted" }, "No errors have been caught yet, make sure you set up your app", -1);
 popScopeId();
-const _sfc_render$f = /* @__PURE__ */ _withId$d((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$i = /* @__PURE__ */ _withId$e((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_router_link = resolveComponent("router-link");
   const _component_ProblemsHeader = resolveComponent("ProblemsHeader");
   const _component_Problems = resolveComponent("Problems");
   return openBlock(), createBlock(Fragment, null, [
-    createVNode("div", _hoisted_1$e, [
-      createVNode("div", _hoisted_2$b, [
+    createVNode("div", _hoisted_1$g, [
+      createVNode("div", _hoisted_2$d, [
         createVNode("h4", {
           class: "text-break",
           textContent: toDisplayString($data.app.Name)
         }, null, 8, ["textContent"]),
-        createVNode("div", _hoisted_3$b, [
-          _hoisted_4$b,
-          _hoisted_5$b,
+        createVNode("div", _hoisted_3$d, [
+          _hoisted_4$d,
+          _hoisted_5$c,
           createVNode("span", {
             textContent: toDisplayString($data.app.ProblemsCount)
           }, null, 8, ["textContent"]),
-          _hoisted_6$9,
-          _hoisted_7$9,
+          _hoisted_6$a,
+          _hoisted_7$a,
           createVNode("span", {
             textContent: toDisplayString($data.app.ApiKey)
           }, null, 8, ["textContent"])
@@ -1294,8 +1338,8 @@ const _sfc_render$f = /* @__PURE__ */ _withId$d((_ctx, _cache, $props, $setup, $
           to: { name: "RouteAppsEdit", params: { id: $data.app.Id } },
           class: "btn btn-primary"
         }, {
-          default: _withId$d(() => [
-            _hoisted_8$9
+          default: _withId$e(() => [
+            _hoisted_8$a
           ]),
           _: 1
         }, 8, ["to"])
@@ -1303,14 +1347,13 @@ const _sfc_render$f = /* @__PURE__ */ _withId$d((_ctx, _cache, $props, $setup, $
     ]),
     createVNode(_component_ProblemsHeader),
     createVNode(_component_Problems, {
-      problems: $data.problems,
-      pagination: $data.pagination,
+      response: $data.response,
       showingResolved: _ctx.$route.query.status === "resolved",
       onReload: $options.reload
     }, {
-      default: _withId$d(() => [
-        _ctx.$route.query.status === "resolved" ? (openBlock(), createBlock("h5", _hoisted_9$8, "No errors have been caught yet")) : (openBlock(), createBlock(Fragment, { key: 1 }, [
-          _hoisted_10$8,
+      default: _withId$e(() => [
+        _ctx.$route.query.status === "resolved" ? (openBlock(), createBlock("h5", _hoisted_9$9, "No errors have been caught yet")) : (openBlock(), createBlock(Fragment, { key: 1 }, [
+          _hoisted_10$9,
           createVNode("pre", {
             class: "p-3 bg-light border rounded-3 mb-4",
             textContent: toDisplayString($options.rubyCode)
@@ -1318,13 +1361,13 @@ const _sfc_render$f = /* @__PURE__ */ _withId$d((_ctx, _cache, $props, $setup, $
         ], 64))
       ]),
       _: 1
-    }, 8, ["problems", "pagination", "showingResolved", "onReload"])
+    }, 8, ["response", "showingResolved", "onReload"])
   ], 64);
 });
-_sfc_main$h.render = _sfc_render$f;
-_sfc_main$h.__scopeId = "data-v-f5d21916";
+_sfc_main$j.render = _sfc_render$i;
+_sfc_main$j.__scopeId = "data-v-776eddcc";
 var fingerprinter_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _sfc_main$g = {
+const _sfc_main$i = {
   props: {
     obj: Object
   },
@@ -1374,18 +1417,18 @@ const _sfc_main$g = {
     }
   }
 };
-const _withId$c = /* @__PURE__ */ withScopeId();
+const _withId$d = /* @__PURE__ */ withScopeId();
 pushScopeId("data-v-34e68d5c");
-const _hoisted_1$d = { class: "form-check" };
-const _hoisted_2$a = { class: "form-check-label" };
-const _hoisted_3$a = /* @__PURE__ */ createVNode("span", null, "Custom Fingerprinter", -1);
-const _hoisted_4$a = { class: "form-check" };
-const _hoisted_5$a = { class: "form-check-label" };
-const _hoisted_6$8 = /* @__PURE__ */ createVNode("span", null, "Error Class", -1);
-const _hoisted_7$8 = { class: "form-check" };
-const _hoisted_8$8 = { class: "form-check-label" };
-const _hoisted_9$7 = /* @__PURE__ */ createVNode("span", null, "Message", -1);
-const _hoisted_10$7 = { class: "form-check" };
+const _hoisted_1$f = { class: "form-check" };
+const _hoisted_2$c = { class: "form-check-label" };
+const _hoisted_3$c = /* @__PURE__ */ createVNode("span", null, "Custom Fingerprinter", -1);
+const _hoisted_4$c = { class: "form-check" };
+const _hoisted_5$b = { class: "form-check-label" };
+const _hoisted_6$9 = /* @__PURE__ */ createVNode("span", null, "Error Class", -1);
+const _hoisted_7$9 = { class: "form-check" };
+const _hoisted_8$9 = { class: "form-check-label" };
+const _hoisted_9$8 = /* @__PURE__ */ createVNode("span", null, "Message", -1);
+const _hoisted_10$8 = { class: "form-check" };
 const _hoisted_11$6 = { class: "form-check-label" };
 const _hoisted_12$5 = /* @__PURE__ */ createVNode("span", null, "Component", -1);
 const _hoisted_13$5 = { class: "form-check" };
@@ -1404,13 +1447,13 @@ const _hoisted_25$2 = { class: "form-check" };
 const _hoisted_26$2 = { class: "form-check-label" };
 const _hoisted_27$2 = /* @__PURE__ */ createVNode("span", null, "Only First", -1);
 popScopeId();
-const _sfc_render$e = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$h = /* @__PURE__ */ _withId$d((_ctx, _cache, $props, $setup, $data, $options) => {
   return openBlock(), createBlock(Fragment, null, [
     createVNode("fieldset", {
       disabled: !_ctx.currentUser.IsAdmin
     }, [
-      createVNode("div", _hoisted_1$d, [
-        createVNode("label", _hoisted_2$a, [
+      createVNode("div", _hoisted_1$f, [
+        createVNode("label", _hoisted_2$c, [
           withDirectives(createVNode("input", {
             class: "form-check-input",
             type: "checkbox",
@@ -1418,15 +1461,15 @@ const _sfc_render$e = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $
           }, null, 512), [
             [vModelCheckbox, $options.customFingerprinter]
           ]),
-          _hoisted_3$a
+          _hoisted_3$c
         ])
       ])
     ], 8, ["disabled"]),
     createVNode("fieldset", {
       disabled: !_ctx.currentUser.IsAdmin || !$options.customFingerprinter
     }, [
-      createVNode("div", _hoisted_4$a, [
-        createVNode("label", _hoisted_5$a, [
+      createVNode("div", _hoisted_4$c, [
+        createVNode("label", _hoisted_5$b, [
           withDirectives(createVNode("input", {
             class: "form-check-input",
             type: "checkbox",
@@ -1434,11 +1477,11 @@ const _sfc_render$e = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $
           }, null, 512), [
             [vModelCheckbox, $options.currentFingerprinter.ErrorClass]
           ]),
-          _hoisted_6$8
+          _hoisted_6$9
         ])
       ]),
-      createVNode("div", _hoisted_7$8, [
-        createVNode("label", _hoisted_8$8, [
+      createVNode("div", _hoisted_7$9, [
+        createVNode("label", _hoisted_8$9, [
           withDirectives(createVNode("input", {
             class: "form-check-input",
             type: "checkbox",
@@ -1446,10 +1489,10 @@ const _sfc_render$e = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $
           }, null, 512), [
             [vModelCheckbox, $options.currentFingerprinter.Message]
           ]),
-          _hoisted_9$7
+          _hoisted_9$8
         ])
       ]),
-      createVNode("div", _hoisted_10$7, [
+      createVNode("div", _hoisted_10$8, [
         createVNode("label", _hoisted_11$6, [
           withDirectives(createVNode("input", {
             class: "form-check-input",
@@ -1549,15 +1592,15 @@ const _sfc_render$e = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $
     ], 8, ["disabled"])
   ], 64);
 });
-_sfc_main$g.render = _sfc_render$e;
-_sfc_main$g.__scopeId = "data-v-34e68d5c";
+_sfc_main$i.render = _sfc_render$h;
+_sfc_main$i.__scopeId = "data-v-34e68d5c";
 var form_vue_vue_type_style_index_0_scoped_true_lang$1 = "";
-const _sfc_main$f = {
+const _sfc_main$h = {
   props: {
     obj: Object
   },
   components: {
-    Fingerprinter: _sfc_main$g
+    Fingerprinter: _sfc_main$i
   },
   data() {
     return {
@@ -1619,21 +1662,21 @@ const _sfc_main$f = {
     }
   }
 };
-const _withId$b = /* @__PURE__ */ withScopeId();
+const _withId$c = /* @__PURE__ */ withScopeId();
 pushScopeId("data-v-67431654");
-const _hoisted_1$c = { class: "mb-3 row" };
-const _hoisted_2$9 = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "Name", -1);
-const _hoisted_3$9 = { class: "col-sm-8" };
-const _hoisted_4$9 = { class: "mb-3 row" };
-const _hoisted_5$9 = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "API Key", -1);
-const _hoisted_6$7 = { class: "col-sm-8" };
-const _hoisted_7$7 = { class: "col-sm-2" };
-const _hoisted_8$7 = {
+const _hoisted_1$e = { class: "mb-3 row" };
+const _hoisted_2$b = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "Name", -1);
+const _hoisted_3$b = { class: "col-sm-8" };
+const _hoisted_4$b = { class: "mb-3 row" };
+const _hoisted_5$a = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "API Key", -1);
+const _hoisted_6$8 = { class: "col-sm-8" };
+const _hoisted_7$8 = { class: "col-sm-2" };
+const _hoisted_8$8 = {
   key: 0,
   class: "form-control-plaintext"
 };
-const _hoisted_9$6 = { class: "mb-3 row" };
-const _hoisted_10$6 = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "Fingerprinter", -1);
+const _hoisted_9$7 = { class: "mb-3 row" };
+const _hoisted_10$7 = /* @__PURE__ */ createVNode("label", { class: "col-sm-2 col-form-label" }, "Fingerprinter", -1);
 const _hoisted_11$5 = {
   key: 0,
   class: "col-sm-8"
@@ -1642,14 +1685,14 @@ const _hoisted_12$4 = { class: "form-control-plaintext" };
 const _hoisted_13$4 = { class: "mb-3 row" };
 const _hoisted_14$4 = { class: "col-sm-10 offset-sm-2" };
 popScopeId();
-const _sfc_render$d = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$g = /* @__PURE__ */ _withId$c((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Fingerprinter = resolveComponent("Fingerprinter");
   return openBlock(), createBlock("form", {
     onSubmit: _cache[4] || (_cache[4] = withModifiers((...args) => $options.submit && $options.submit(...args), ["prevent"]))
   }, [
-    createVNode("div", _hoisted_1$c, [
-      _hoisted_2$9,
-      createVNode("div", _hoisted_3$9, [
+    createVNode("div", _hoisted_1$e, [
+      _hoisted_2$b,
+      createVNode("div", _hoisted_3$b, [
         withDirectives(createVNode("input", {
           type: "text",
           class: "form-control",
@@ -1661,9 +1704,9 @@ const _sfc_render$d = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $
         ])
       ])
     ]),
-    createVNode("div", _hoisted_4$9, [
-      _hoisted_5$9,
-      createVNode("div", _hoisted_6$7, [
+    createVNode("div", _hoisted_4$b, [
+      _hoisted_5$a,
+      createVNode("div", _hoisted_6$8, [
         withDirectives(createVNode("input", {
           type: "text",
           class: "form-control",
@@ -1674,8 +1717,8 @@ const _sfc_render$d = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $
           [vModelText, $props.obj.ApiKey]
         ])
       ]),
-      createVNode("div", _hoisted_7$7, [
-        _ctx.currentUser.IsAdmin ? (openBlock(), createBlock("div", _hoisted_8$7, [
+      createVNode("div", _hoisted_7$8, [
+        _ctx.currentUser.IsAdmin ? (openBlock(), createBlock("div", _hoisted_8$8, [
           createVNode("a", {
             href: "",
             onClick: _cache[3] || (_cache[3] = withModifiers((...args) => $options.generateApiKey && $options.generateApiKey(...args), ["prevent"]))
@@ -1683,8 +1726,8 @@ const _sfc_render$d = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $
         ])) : createCommentVNode("", true)
       ])
     ]),
-    createVNode("div", _hoisted_9$6, [
-      _hoisted_10$6,
+    createVNode("div", _hoisted_9$7, [
+      _hoisted_10$7,
       $props.obj.ActualFingerprinter ? (openBlock(), createBlock("div", _hoisted_11$5, [
         createVNode("div", _hoisted_12$4, [
           createVNode(_component_Fingerprinter, { obj: $props.obj }, null, 8, ["obj"])
@@ -1702,12 +1745,12 @@ const _sfc_render$d = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $
     ])
   ], 32);
 });
-_sfc_main$f.render = _sfc_render$d;
-_sfc_main$f.__scopeId = "data-v-67431654";
+_sfc_main$h.render = _sfc_render$g;
+_sfc_main$h.__scopeId = "data-v-67431654";
 var new_vue_vue_type_style_index_0_scoped_true_lang$1 = "";
-const _sfc_main$e = {
+const _sfc_main$g = {
   components: {
-    Form: _sfc_main$f
+    Form: _sfc_main$h
   },
   data() {
     return {
@@ -1734,16 +1777,16 @@ const _sfc_main$e = {
     }, next);
   }
 };
-const _withId$a = /* @__PURE__ */ withScopeId();
+const _withId$b = /* @__PURE__ */ withScopeId();
 pushScopeId("data-v-3fbf1a4a");
-const _hoisted_1$b = /* @__PURE__ */ createVNode("div", { class: "mb-3 border-bottom" }, [
+const _hoisted_1$d = /* @__PURE__ */ createVNode("div", { class: "mb-3 border-bottom" }, [
   /* @__PURE__ */ createVNode("h1", { class: "h3" }, "Add App")
 ], -1);
 popScopeId();
-const _sfc_render$c = /* @__PURE__ */ _withId$a((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$f = /* @__PURE__ */ _withId$b((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Form = resolveComponent("Form");
   return openBlock(), createBlock(Fragment, null, [
-    _hoisted_1$b,
+    _hoisted_1$d,
     createVNode(_component_Form, {
       class: "col-sm-8",
       obj: $data.app,
@@ -1751,49 +1794,49 @@ const _sfc_render$c = /* @__PURE__ */ _withId$a((_ctx, _cache, $props, $setup, $
     }, null, 8, ["obj"])
   ], 64);
 });
-_sfc_main$e.render = _sfc_render$c;
-_sfc_main$e.__scopeId = "data-v-3fbf1a4a";
-const _sfc_main$d = {};
-const _hoisted_1$a = { class: "nav nav-pills mb-3" };
-const _hoisted_2$8 = { class: "nav-item" };
-const _hoisted_3$8 = /* @__PURE__ */ createTextVNode("Edit App");
-const _hoisted_4$8 = { class: "nav-item" };
-const _hoisted_5$8 = /* @__PURE__ */ createTextVNode("Notification Services");
-function _sfc_render$b(_ctx, _cache) {
+_sfc_main$g.render = _sfc_render$f;
+_sfc_main$g.__scopeId = "data-v-3fbf1a4a";
+const _sfc_main$f = {};
+const _hoisted_1$c = { class: "nav nav-pills mb-3" };
+const _hoisted_2$a = { class: "nav-item" };
+const _hoisted_3$a = /* @__PURE__ */ createTextVNode("Edit App");
+const _hoisted_4$a = { class: "nav-item" };
+const _hoisted_5$9 = /* @__PURE__ */ createTextVNode("Notification Services");
+function _sfc_render$e(_ctx, _cache) {
   const _component_router_link = resolveComponent("router-link");
-  return openBlock(), createBlock("ul", _hoisted_1$a, [
-    createVNode("li", _hoisted_2$8, [
+  return openBlock(), createBlock("ul", _hoisted_1$c, [
+    createVNode("li", _hoisted_2$a, [
       createVNode(_component_router_link, {
         class: "nav-link",
         "active-class": "active",
         to: { name: "RouteAppsEdit" }
       }, {
         default: withCtx(() => [
-          _hoisted_3$8
+          _hoisted_3$a
         ]),
         _: 1
       })
     ]),
-    createVNode("li", _hoisted_4$8, [
+    createVNode("li", _hoisted_4$a, [
       createVNode(_component_router_link, {
         class: "nav-link",
         "active-class": "active",
         to: { name: "RouteAppsNotifications" }
       }, {
         default: withCtx(() => [
-          _hoisted_5$8
+          _hoisted_5$9
         ]),
         _: 1
       })
     ])
   ]);
 }
-_sfc_main$d.render = _sfc_render$b;
+_sfc_main$f.render = _sfc_render$e;
 var edit_vue_vue_type_style_index_0_scoped_true_lang$1 = "";
-const _sfc_main$c = {
+const _sfc_main$e = {
   components: {
-    Nav: _sfc_main$d,
-    Form: _sfc_main$f
+    Nav: _sfc_main$f,
+    Form: _sfc_main$h
   },
   data() {
     return {
@@ -1814,8 +1857,8 @@ const _sfc_main$c = {
     }, next);
   }
 };
-const _withId$9 = /* @__PURE__ */ withScopeId();
-const _sfc_render$a = /* @__PURE__ */ _withId$9((_ctx, _cache, $props, $setup, $data, $options) => {
+const _withId$a = /* @__PURE__ */ withScopeId();
+const _sfc_render$d = /* @__PURE__ */ _withId$a((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Nav = resolveComponent("Nav");
   const _component_Form = resolveComponent("Form");
   return openBlock(), createBlock(Fragment, null, [
@@ -1826,9 +1869,9 @@ const _sfc_render$a = /* @__PURE__ */ _withId$9((_ctx, _cache, $props, $setup, $
     }, null, 8, ["obj"])
   ], 64);
 });
-_sfc_main$c.render = _sfc_render$a;
-_sfc_main$c.__scopeId = "data-v-bc38fe34";
-const _sfc_main$b = {
+_sfc_main$e.render = _sfc_render$d;
+_sfc_main$e.__scopeId = "data-v-bc38fe34";
+const _sfc_main$d = {
   props: {
     isEdit: Boolean,
     field: Object,
@@ -1866,20 +1909,20 @@ const _sfc_main$b = {
     }
   }
 };
-const _hoisted_1$9 = { class: "form-label" };
-const _hoisted_2$7 = {
+const _hoisted_1$b = { class: "form-label" };
+const _hoisted_2$9 = {
   key: 3,
   class: "form-control-plaintext"
 };
-const _hoisted_3$7 = {
+const _hoisted_3$9 = {
   key: 0,
   class: "d-flex"
 };
-const _hoisted_4$7 = { class: "w-100" };
-const _hoisted_5$7 = { class: "form-control-plaintext" };
-function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
+const _hoisted_4$9 = { class: "w-100" };
+const _hoisted_5$8 = { class: "form-control-plaintext" };
+function _sfc_render$c(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createBlock(Fragment, null, [
-    createVNode("label", _hoisted_1$9, [
+    createVNode("label", _hoisted_1$b, [
       createVNode("span", {
         textContent: toDisplayString($props.field.Label)
       }, null, 8, ["textContent"]),
@@ -1927,9 +1970,9 @@ function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
         void 0,
         { number: true }
       ]
-    ]) : $props.isEdit && $props.field.Type === "password" ? (openBlock(), createBlock("div", _hoisted_2$7, [
-      $data.editing[$props.field.Name] ? (openBlock(), createBlock("div", _hoisted_3$7, [
-        createVNode("div", _hoisted_4$7, [
+    ]) : $props.isEdit && $props.field.Type === "password" ? (openBlock(), createBlock("div", _hoisted_2$9, [
+      $data.editing[$props.field.Name] ? (openBlock(), createBlock("div", _hoisted_3$9, [
+        createVNode("div", _hoisted_4$9, [
           withDirectives(createVNode("input", {
             class: "form-control",
             autocomplete: "off",
@@ -1942,7 +1985,7 @@ function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
           ])
         ]),
         createVNode("div", null, [
-          createVNode("div", _hoisted_5$7, [
+          createVNode("div", _hoisted_5$8, [
             createVNode("a", {
               class: "ms-3 small text-danger",
               href: "",
@@ -1973,7 +2016,7 @@ function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
     ])
   ], 64);
 }
-_sfc_main$b.render = _sfc_render$9;
+_sfc_main$d.render = _sfc_render$c;
 function makeMarkdownLinks(el) {
   let nodes = el.childNodes;
   let add = [];
@@ -2003,7 +2046,7 @@ function makeMarkdownLinks(el) {
     el.insertBefore(item[0], item[1]);
   });
 }
-const _sfc_main$a = {
+const _sfc_main$c = {
   mounted(el, binding) {
     el.innerText = binding.value;
     setTimeout(() => {
@@ -2018,13 +2061,13 @@ const _sfc_main$a = {
   }
 };
 var notifications_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _sfc_main$9 = {
+const _sfc_main$b = {
   components: {
-    Nav: _sfc_main$d,
-    NotificationField: _sfc_main$b
+    Nav: _sfc_main$f,
+    NotificationField: _sfc_main$d
   },
   directives: {
-    SimpleHtml: _sfc_main$a
+    SimpleHtml: _sfc_main$c
   },
   data() {
     return {
@@ -2252,9 +2295,9 @@ const _sfc_main$9 = {
     next();
   }
 };
-const _withId$8 = /* @__PURE__ */ withScopeId();
+const _withId$9 = /* @__PURE__ */ withScopeId();
 pushScopeId("data-v-0f1f696f");
-const _hoisted_1$8 = /* @__PURE__ */ createVNode("div", { class: "mb-3" }, [
+const _hoisted_1$a = /* @__PURE__ */ createVNode("div", { class: "mb-3" }, [
   /* @__PURE__ */ createVNode("button", {
     type: "button",
     class: "btn btn-secondary",
@@ -2262,21 +2305,21 @@ const _hoisted_1$8 = /* @__PURE__ */ createVNode("div", { class: "mb-3" }, [
     "data-bs-target": "#add"
   }, "Add New Service...")
 ], -1);
-const _hoisted_2$6 = { class: "row" };
-const _hoisted_3$6 = { class: "card mb-3" };
-const _hoisted_4$6 = { class: "card-header d-flex align-items-center justify-content-between" };
-const _hoisted_5$6 = { class: "form-check-label" };
-const _hoisted_6$6 = {
+const _hoisted_2$8 = { class: "row" };
+const _hoisted_3$8 = { class: "card mb-3" };
+const _hoisted_4$8 = { class: "card-header d-flex align-items-center justify-content-between" };
+const _hoisted_5$7 = { class: "form-check-label" };
+const _hoisted_6$7 = {
   key: 0,
   class: "small me-3 text-muted"
 };
-const _hoisted_7$6 = { class: "table small mb-0" };
-const _hoisted_8$6 = { key: 0 };
-const _hoisted_9$5 = /* @__PURE__ */ createVNode("input", {
+const _hoisted_7$7 = { class: "table small mb-0" };
+const _hoisted_8$7 = { key: 0 };
+const _hoisted_9$6 = /* @__PURE__ */ createVNode("input", {
   type: "text",
   class: "fake-input"
 }, null, -1);
-const _hoisted_10$5 = /* @__PURE__ */ createVNode("input", {
+const _hoisted_10$6 = /* @__PURE__ */ createVNode("input", {
   type: "password",
   class: "fake-input"
 }, null, -1);
@@ -2337,21 +2380,21 @@ const _hoisted_33$1 = {
 const _hoisted_34$1 = { class: "mb-3" };
 const _hoisted_35$1 = { class: "modal-footer justify-content-between" };
 popScopeId();
-const _sfc_render$8 = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$b = /* @__PURE__ */ _withId$9((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Nav = resolveComponent("Nav");
   const _component_NotificationField = resolveComponent("NotificationField");
   const _directive_SimpleHtml = resolveDirective("SimpleHtml");
   return openBlock(), createBlock(Fragment, null, [
     createVNode(_component_Nav),
-    _hoisted_1$8,
-    createVNode("div", _hoisted_2$6, [
+    _hoisted_1$a,
+    createVNode("div", _hoisted_2$8, [
       (openBlock(true), createBlock(Fragment, null, renderList($data.services, (service) => {
         return openBlock(), createBlock("div", {
           class: ["col-sm-6", { disabled: !service.Enabled }]
         }, [
-          createVNode("div", _hoisted_3$6, [
-            createVNode("div", _hoisted_4$6, [
-              createVNode("label", _hoisted_5$6, [
+          createVNode("div", _hoisted_3$8, [
+            createVNode("div", _hoisted_4$8, [
+              createVNode("label", _hoisted_5$7, [
                 createVNode("input", {
                   class: "form-check-input",
                   type: "checkbox",
@@ -2365,7 +2408,7 @@ const _sfc_render$8 = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $
                 }, null, 8, ["textContent"])
               ]),
               createVNode("div", null, [
-                $data.loading ? (openBlock(), createBlock("span", _hoisted_6$6, "Test")) : (openBlock(), createBlock("a", {
+                $data.loading ? (openBlock(), createBlock("span", _hoisted_6$7, "Test")) : (openBlock(), createBlock("a", {
                   key: 1,
                   href: "",
                   class: "small me-3",
@@ -2380,11 +2423,11 @@ const _sfc_render$8 = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $
                 }, "Edit", 8, ["onClick"])
               ])
             ]),
-            createVNode("table", _hoisted_7$6, [
+            createVNode("table", _hoisted_7$7, [
               createVNode("tbody", null, [
                 (openBlock(true), createBlock(Fragment, null, renderList($options.getService(service.Name, "Fields"), (field) => {
                   return openBlock(), createBlock(Fragment, null, [
-                    $options.optionValueOf(service, field.Name) ? (openBlock(), createBlock("tr", _hoisted_8$6, [
+                    $options.optionValueOf(service, field.Name) ? (openBlock(), createBlock("tr", _hoisted_8$7, [
                       createVNode("th", {
                         width: "30%",
                         textContent: toDisplayString(field.Label)
@@ -2408,8 +2451,8 @@ const _sfc_render$8 = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $
       id: "add",
       tabindex: "-1"
     }, [
-      _hoisted_9$5,
-      _hoisted_10$5,
+      _hoisted_9$6,
+      _hoisted_10$6,
       createVNode("div", _hoisted_11$4, [
         createVNode("div", _hoisted_12$3, [
           _hoisted_13$3,
@@ -2528,19 +2571,17 @@ const _sfc_render$8 = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $
     ], 32)
   ], 64);
 });
-_sfc_main$9.render = _sfc_render$8;
-_sfc_main$9.__scopeId = "data-v-0f1f696f";
+_sfc_main$b.render = _sfc_render$b;
+_sfc_main$b.__scopeId = "data-v-0f1f696f";
 var index_vue_vue_type_style_index_0_scoped_true_lang$2 = "";
-const _sfc_main$8 = {
+const _sfc_main$a = {
   components: {
-    Problems: _sfc_main$j,
-    ProblemsHeader: _sfc_main$i
+    Problems: _sfc_main$l,
+    ProblemsHeader: _sfc_main$k
   },
   data() {
     return {
-      problems: [],
-      pagination: {},
-      apps: []
+      response: {}
     };
   },
   methods: {
@@ -2549,9 +2590,7 @@ const _sfc_main$8 = {
     },
     reload() {
       http.get("/problems", { params: this.$route.query }).then((res) => {
-        this.problems = res.data.Problems;
-        this.pagination = res.data.Pagination;
-        this.apps = res.data.Apps;
+        this.response = res.data;
         this.query = this.$route.query.query;
         this.load();
       });
@@ -2560,9 +2599,7 @@ const _sfc_main$8 = {
   beforeRouteEnter(to, from, next) {
     http.get("/problems", { params: to.query }).then((res) => {
       next((vm2) => {
-        vm2.problems = res.data.Problems;
-        vm2.pagination = res.data.Pagination;
-        vm2.apps = res.data.Apps;
+        vm2.response = res.data;
         vm2.query = to.query.query;
         vm2.load();
       });
@@ -2570,46 +2607,440 @@ const _sfc_main$8 = {
   },
   beforeRouteUpdate(to, from, next) {
     http.get("/problems", { params: to.query }).then((res) => {
-      this.problems = res.data.Problems;
-      this.pagination = res.data.Pagination;
-      this.apps = res.data.Apps;
+      this.response = res.data;
       this.query = to.query.query;
       this.load();
       next();
     }, next);
   }
 };
-const _withId$7 = /* @__PURE__ */ withScopeId();
-pushScopeId("data-v-0955a084");
-const _hoisted_1$7 = /* @__PURE__ */ createVNode("h5", { class: "mb-0 text-muted" }, "No errors have been caught yet", -1);
+const _withId$8 = /* @__PURE__ */ withScopeId();
+pushScopeId("data-v-ca052610");
+const _hoisted_1$9 = /* @__PURE__ */ createVNode("h5", { class: "mb-0 text-muted" }, "No errors have been caught yet", -1);
 popScopeId();
-const _sfc_render$7 = /* @__PURE__ */ _withId$7((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$a = /* @__PURE__ */ _withId$8((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_ProblemsHeader = resolveComponent("ProblemsHeader");
   const _component_Problems = resolveComponent("Problems");
   return openBlock(), createBlock(Fragment, null, [
     createVNode(_component_ProblemsHeader),
     createVNode(_component_Problems, {
-      problems: $data.problems,
+      response: $data.response,
       showingResolved: _ctx.$route.query.status === "resolved",
-      apps: $data.apps,
-      pagination: $data.pagination,
       onReload: $options.reload
     }, {
-      default: _withId$7(() => [
-        _hoisted_1$7
+      default: _withId$8(() => [
+        _hoisted_1$9
       ]),
       _: 1
-    }, 8, ["problems", "showingResolved", "apps", "pagination", "onReload"])
+    }, 8, ["response", "showingResolved", "onReload"])
   ], 64);
 });
-_sfc_main$8.render = _sfc_render$7;
-_sfc_main$8.__scopeId = "data-v-0955a084";
+_sfc_main$a.render = _sfc_render$a;
+_sfc_main$a.__scopeId = "data-v-ca052610";
+const _sfc_main$9 = {
+  props: {
+    loading: Boolean
+  },
+  emits: [
+    "delete"
+  ],
+  mounted() {
+    let button = this.$refs.button;
+    let confirm = this.$refs.confirm;
+    confirm.parentNode.removeChild(confirm);
+    confirm.classList.remove("d-none");
+    this.popover = new Popover(button, {
+      html: true,
+      trigger: "focus",
+      content: confirm,
+      container: button
+    });
+  },
+  methods: {
+    cancel() {
+      this.popover.hide();
+    },
+    delete() {
+      this.$emit("delete");
+      this.popover.hide();
+    }
+  }
+};
+const _hoisted_1$8 = {
+  type: "button",
+  class: "btn btn-sm btn-danger",
+  ref: "button"
+};
+const _hoisted_2$7 = {
+  class: "d-none",
+  ref: "confirm"
+};
+const _hoisted_3$7 = /* @__PURE__ */ createVNode("div", { class: "mb-2" }, "Permanently delete this comment?", -1);
+const _hoisted_4$7 = { class: "d-flex justify-content-between" };
+function _sfc_render$9(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_faicon = resolveComponent("faicon");
+  return openBlock(), createBlock(Fragment, null, [
+    createVNode("button", _hoisted_1$8, [
+      createVNode(_component_faicon, { icon: "trash-alt" })
+    ], 512),
+    createVNode("div", _hoisted_2$7, [
+      _hoisted_3$7,
+      createVNode("div", _hoisted_4$7, [
+        createVNode("a", {
+          href: "",
+          onClick: _cache[1] || (_cache[1] = withModifiers((...args) => $options.delete && $options.delete(...args), ["prevent"])),
+          class: [{ disabled: $props.loading }, "btn btn-sm btn-danger"]
+        }, "Delete", 2),
+        createVNode("a", {
+          href: "",
+          onClick: _cache[2] || (_cache[2] = withModifiers((...args) => $options.cancel && $options.cancel(...args), ["prevent"])),
+          class: [{ disabled: $props.loading }, "btn btn-sm btn-secondary"]
+        }, "Cancel", 2)
+      ])
+    ], 512)
+  ], 64);
+}
+_sfc_main$9.render = _sfc_render$9;
+var comments_vue_vue_type_style_index_0_scoped_true_lang = "";
+const observer = (() => {
+  if (window.ResizeObserver) {
+    return new window.ResizeObserver((entries) => {
+      for (let entry of entries) {
+        let truncated = entry.target.scrollHeight > entry.contentRect.height;
+        entry.target.classList[truncated ? "add" : "remove"]("truncated");
+      }
+    });
+  }
+  return null;
+})();
+const _sfc_main$8 = {
+  props: {
+    commentsResponse: Object,
+    appId: Number,
+    problemId: Number
+  },
+  components: {
+    CommentAction: _sfc_main$9,
+    Pagination: _sfc_main$o
+  },
+  directives: {
+    tooltip: {
+      mounted(el) {
+        new Tooltip(el, { animation: false });
+      }
+    },
+    body: {
+      mounted(el) {
+        if (observer)
+          observer.observe(el);
+      }
+    }
+  },
+  data() {
+    return {
+      loading: false,
+      editingComment: null,
+      listTransitionName: null,
+      showMore: {},
+      newCommentBody: null
+    };
+  },
+  computed: {
+    comments() {
+      return this.commentsResponse.Comments || [];
+    },
+    pagination() {
+      return this.commentsResponse.Pagination || {};
+    },
+    users() {
+      return this.commentsResponse.Users || {};
+    },
+    commentBody: {
+      get() {
+        if (this.editingComment) {
+          return this.editingComment.Body;
+        }
+        return this.newCommentBody;
+      },
+      set(val) {
+        if (this.editingComment) {
+          this.editingComment.Body = val;
+          return;
+        }
+        this.newCommentBody = val;
+      }
+    }
+  },
+  methods: {
+    timeago(time) {
+      return format(time);
+    },
+    getUser(comment, key) {
+      if (comment && comment.UserId) {
+        let user2 = this.users.find((u) => u.Id === comment.UserId);
+        if (user2 && key)
+          return user2[key];
+        return user2;
+      }
+      return null;
+    },
+    reload() {
+      if (this.commentsResponse.$$reload) {
+        this.loading = true;
+        this.commentsResponse.$$reload().then((res) => {
+          this.loading = false;
+          for (let key in res.data) {
+            this.commentsResponse[key] = res.data[key];
+          }
+        }, () => {
+          this.loading = false;
+        });
+        return;
+      }
+      const current = this.$route;
+      this.$router.replace({
+        name: "RouteBlank"
+      }).then(() => {
+        this.$router.replace(current);
+      });
+    },
+    isEdited(comment) {
+      return new Date(comment.UpdatedAt) - new Date(comment.CreatedAt) > 1e3;
+    },
+    edit(comment) {
+      this.editingComment = JSON.parse(JSON.stringify(comment));
+      this.$refs.Body.focus();
+    },
+    keySubmit(e) {
+      if (e.metaKey || e.ctrlKey) {
+        this.submit();
+      }
+    },
+    submit() {
+      if (this.loading)
+        return;
+      this.loading = true;
+      this.processErrors();
+      let Body = this.commentBody;
+      if (typeof Body === "string") {
+        Body = Body.trim();
+      }
+      let method = null;
+      let url = null;
+      if (this.editingComment) {
+        method = "put";
+        url = `/apps/${this.appId}/problems/${this.problemId}/comments/${this.editingComment.Id}`;
+      } else {
+        method = "post";
+        url = `/apps/${this.appId}/problems/${this.problemId}/comments`;
+      }
+      http[method](url, { Body }).then(() => {
+        this.loading = false;
+        this.$toast().success(this.editingComment ? "Successfully updated comment" : "Successfully added comment");
+        this.editingComment = null;
+        this.commentBody = null;
+        this.reload();
+      }, (e) => {
+        this.loading = false;
+        if (!this.processErrors(e)) {
+          if (!e || !e.toastShown) {
+            this.$toast().error(this.editingComment ? "Error updating comment" : "Error adding comment");
+          }
+        }
+      });
+    },
+    toRemove(commentId) {
+      this.listTransitionName = "destroy";
+      let url = `/apps/${this.appId}/problems/${this.problemId}/comments/${commentId}`;
+      this.loading = true;
+      http.delete(url).then((res) => {
+        this.loading = false;
+        this.$toast().success("Successfully deleted comment");
+        this.remove(commentId);
+      }, (e) => {
+        this.loading = false;
+        if (!e || !e.toastShown) {
+          this.$toast().error("Failed to delete comment");
+        }
+        this.remove();
+      });
+    },
+    remove(id) {
+      for (let i = this.comments.length - 1; i > -1; i--) {
+        if (this.comments[i].Id === id) {
+          this.comments.splice(i, 1);
+          this.pagination.TotalCount -= 1;
+        }
+      }
+      setTimeout(() => {
+        this.listTransitionName = null;
+      }, 400);
+    }
+  }
+};
+const _withId$7 = /* @__PURE__ */ withScopeId();
+pushScopeId("data-v-12cf1681");
+const _hoisted_1$7 = /* @__PURE__ */ createVNode("a", {
+  name: "comments",
+  id: "comments",
+  class: "anchor"
+}, null, -1);
+const _hoisted_2$6 = {
+  key: 0,
+  class: "text-muted"
+};
+const _hoisted_3$6 = { class: "d-flex w-100 align-items-start justify-content-between" };
+const _hoisted_4$6 = { class: "d-sm-flex mb-2 align-items-center" };
+const _hoisted_5$6 = {
+  key: 0,
+  class: "ms-2"
+};
+const _hoisted_6$6 = { class: "show-more" };
+const _hoisted_7$6 = {
+  key: 2,
+  class: "mb-3"
+};
+const _hoisted_8$6 = {
+  key: 3,
+  class: "mb-3"
+};
+const _hoisted_9$5 = { class: "col-10 mb-3" };
+const _hoisted_10$5 = { class: "d-flex align-items-center" };
+popScopeId();
+const _sfc_render$8 = /* @__PURE__ */ _withId$7((_ctx, _cache, $props, $setup, $data, $options) => {
+  const _component_faicon = resolveComponent("faicon");
+  const _component_CommentAction = resolveComponent("CommentAction");
+  const _component_Pagination = resolveComponent("Pagination");
+  const _directive_tooltip = resolveDirective("tooltip");
+  const _directive_body = resolveDirective("body");
+  return openBlock(), createBlock(Fragment, null, [
+    _hoisted_1$7,
+    createVNode("h5", {
+      class: "mb-3",
+      textContent: toDisplayString(`Comments (${$options.pagination.TotalCount || 0})`)
+    }, null, 8, ["textContent"]),
+    $options.pagination.TotalCount === 0 ? (openBlock(), createBlock("div", _hoisted_2$6, "No comments yet.")) : createCommentVNode("", true),
+    createVNode(TransitionGroup, {
+      name: $data.listTransitionName,
+      tag: "div",
+      class: "list-group mb-5"
+    }, {
+      default: _withId$7(() => [
+        (openBlock(true), createBlock(Fragment, null, renderList($options.comments, (comment) => {
+          return openBlock(), createBlock("div", {
+            class: "list-group-item py-3",
+            key: comment.Id
+          }, [
+            createVNode("div", _hoisted_3$6, [
+              createVNode("div", {
+                class: ["col-10", { more: $data.showMore[comment.Id] }]
+              }, [
+                createVNode("div", _hoisted_4$6, [
+                  createVNode("strong", {
+                    textContent: toDisplayString($options.getUser(comment, "Name"))
+                  }, null, 8, ["textContent"]),
+                  withDirectives(createVNode("small", {
+                    class: "ms-3",
+                    title: _ctx.formatTime(comment.CreatedAt),
+                    textContent: toDisplayString($options.timeago(comment.CreatedAt))
+                  }, null, 8, ["title", "textContent"]), [
+                    [_directive_tooltip]
+                  ]),
+                  $options.isEdited(comment) ? withDirectives((openBlock(), createBlock("small", {
+                    key: 0,
+                    class: "ms-3 text-muted fst-italic",
+                    title: _ctx.formatTime(comment.UpdatedAt)
+                  }, "(edited)", 8, ["title"])), [
+                    [_directive_tooltip]
+                  ]) : createCommentVNode("", true),
+                  comment.UserId === _ctx.currentUser.Id ? (openBlock(), createBlock("a", {
+                    key: 1,
+                    href: "",
+                    class: "ms-auto small d-block",
+                    onClick: withModifiers(($event) => $options.edit(comment), ["prevent"])
+                  }, [
+                    createVNode(_component_faicon, { icon: "edit" }),
+                    $data.editingComment && $data.editingComment.Id === comment.Id ? (openBlock(), createBlock("span", _hoisted_5$6, "editing")) : createCommentVNode("", true)
+                  ], 8, ["onClick"])) : createCommentVNode("", true)
+                ]),
+                withDirectives(createVNode("div", {
+                  class: "small comment-body text-break",
+                  textContent: toDisplayString(comment.Body)
+                }, null, 8, ["textContent"]), [
+                  [_directive_body]
+                ]),
+                createVNode("div", _hoisted_6$6, [
+                  createVNode("a", {
+                    href: "",
+                    class: "small",
+                    onClick: withModifiers(($event) => $data.showMore[comment.Id] = true, ["prevent"])
+                  }, "show more", 8, ["onClick"])
+                ])
+              ], 2),
+              createVNode(_component_CommentAction, {
+                onDelete: ($event) => $options.toRemove(comment.Id),
+                loading: $data.loading
+              }, null, 8, ["onDelete", "loading"])
+            ])
+          ]);
+        }), 128))
+      ]),
+      _: 1
+    }, 8, ["name"]),
+    $options.pagination.TotalPages > 1 ? (openBlock(), createBlock(_component_Pagination, {
+      key: 1,
+      hash: "#comments",
+      pagination: $options.pagination
+    }, null, 8, ["pagination"])) : createCommentVNode("", true),
+    $data.editingComment ? (openBlock(), createBlock("h5", _hoisted_7$6, "Edit comment")) : (openBlock(), createBlock("h5", _hoisted_8$6, "Add a comment")),
+    createVNode("form", {
+      class: "mb-5",
+      onSubmit: _cache[4] || (_cache[4] = withModifiers((...args) => $options.submit && $options.submit(...args), ["prevent"]))
+    }, [
+      createVNode("div", _hoisted_9$5, [
+        withDirectives(createVNode("textarea", {
+          class: "form-control",
+          rows: "5",
+          onKeydown: _cache[1] || (_cache[1] = withKeys((...args) => $options.keySubmit && $options.keySubmit(...args), ["enter"])),
+          ref: "Body",
+          "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $options.commentBody = $event)
+        }, null, 544), [
+          [vModelText, $options.commentBody]
+        ])
+      ]),
+      createVNode("div", _hoisted_10$5, [
+        createVNode("button", {
+          type: "submit",
+          disabled: $data.loading,
+          class: "btn btn-primary"
+        }, "Submit", 8, ["disabled"]),
+        $data.editingComment ? (openBlock(), createBlock("a", {
+          key: 0,
+          class: "ms-4",
+          href: "",
+          onClick: _cache[3] || (_cache[3] = withModifiers(($event) => $data.editingComment = null, ["prevent"]))
+        }, "Cancel")) : createCommentVNode("", true)
+      ])
+    ], 32)
+  ], 64);
+});
+_sfc_main$8.render = _sfc_render$8;
+_sfc_main$8.__scopeId = "data-v-12cf1681";
 var show_vue_vue_type_style_index_0_scoped_true_lang = "";
-function makeRequests(params) {
+function getCommnents(to) {
+  return http.get(`/apps/${to.params.id}/problems/${to.params.pid}/comments`, {
+    params: to.query
+  }).then((res) => {
+    res.data.$$reload = () => getCommnents(to);
+    return res;
+  });
+}
+function makeRequests(to) {
   return Promise.all([
-    http.get(`/apps/${params.id}`),
-    http.get(`/apps/${params.id}/problems/${params.pid}`),
-    params.nid ? http.get(`/apps/${params.id}/problems/${params.pid}/notices/${params.nid}`) : Promise.resolve()
+    http.get(`/apps/${to.params.id}`),
+    http.get(`/apps/${to.params.id}/problems/${to.params.pid}`),
+    to.params.nid ? http.get(`/apps/${to.params.id}/problems/${to.params.pid}/notices/${to.params.nid}`) : Promise.resolve(),
+    getCommnents(to)
   ]);
 }
 const _sfc_main$7 = {
@@ -2618,8 +3049,12 @@ const _sfc_main$7 = {
       app: {},
       problem: {},
       notice: {},
+      commentsResponse: {},
       nav: null
     };
+  },
+  components: {
+    Comments: _sfc_main$8
   },
   computed: {
     hasUserAttributes() {
@@ -2630,8 +3065,10 @@ const _sfc_main$7 = {
     }
   },
   methods: {
-    load() {
-      this.getNav();
+    load(route, noChange) {
+      if (noChange !== true) {
+        this.getNav();
+      }
       window.lastProblemId = this.problem.Id;
       window.lastAppId = this.app.Id;
     },
@@ -2656,15 +3093,17 @@ const _sfc_main$7 = {
     }
   },
   beforeRouteEnter(to, from, next) {
-    makeRequests(to.params).then((res) => {
+    makeRequests(to).then((res) => {
       const app2 = res[0].data.App;
       const problem = res[1].data.Problem;
+      const commentsResponse = res[3].data;
       if (res[2]) {
         next((vm2) => {
           vm2.app = app2;
           vm2.problem = problem;
           vm2.notice = res[2].data.Notice;
-          vm2.load();
+          vm2.commentsResponse = commentsResponse;
+          vm2.load(to);
         });
         return;
       }
@@ -2673,20 +3112,34 @@ const _sfc_main$7 = {
           vm2.app = app2;
           vm2.problem = problem;
           vm2.notice = res2.data.Notice;
-          vm2.load();
+          vm2.commentsResponse = commentsResponse;
+          vm2.load(to);
         });
       }, next);
     }, next);
   },
   beforeRouteUpdate(to, from, next) {
-    makeRequests(to.params).then((res) => {
+    function withoutPage(path) {
+      return path.replace(/[?&]?page=\d+/, "");
+    }
+    if (withoutPage(to.fullPath) === withoutPage(from.fullPath)) {
+      getCommnents(to).then((res) => {
+        this.commentsResponse = res.data;
+        this.load(to, true);
+        next();
+      }, next);
+      return;
+    }
+    makeRequests(to).then((res) => {
       const app2 = res[0].data.App;
       const problem = res[1].data.Problem;
+      const commentsResponse = res[3].data;
       if (res[2]) {
         this.app = app2;
         this.problem = problem;
         this.notice = res[2].data.Notice;
-        this.load();
+        this.commentsResponse = commentsResponse;
+        this.load(to);
         next();
         return;
       }
@@ -2694,14 +3147,15 @@ const _sfc_main$7 = {
         this.app = app2;
         this.problem = problem;
         this.notice = res2.data.Notice;
-        this.load();
+        this.commentsResponse = commentsResponse;
+        this.load(to);
         next();
       }, next);
     }, next);
   }
 };
 const _withId$6 = /* @__PURE__ */ withScopeId();
-pushScopeId("data-v-7443bda1");
+pushScopeId("data-v-0ad04a24");
 const _hoisted_1$6 = { class: "p-3 bg-light border rounded-3 mb-4" };
 const _hoisted_2$5 = { class: "d-sm-flex align-items-center justify-content-between" };
 const _hoisted_3$5 = {
@@ -2758,8 +3212,8 @@ const _hoisted_28 = /* @__PURE__ */ createVNode("button", {
   "data-bs-toggle": "pill",
   "data-bs-target": "#page-user"
 }, "User", -1);
-const _hoisted_29 = /* @__PURE__ */ createStaticVNode('<li class="nav-item" data-v-7443bda1><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-environment" data-v-7443bda1>Environment</button></li><li class="nav-item" data-v-7443bda1><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-parameters" data-v-7443bda1>Parameters</button></li><li class="nav-item" data-v-7443bda1><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-session" data-v-7443bda1>Session</button></li>', 3);
-const _hoisted_32 = { class: "tab-content" };
+const _hoisted_29 = /* @__PURE__ */ createStaticVNode('<li class="nav-item" data-v-0ad04a24><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-environment" data-v-0ad04a24>Environment</button></li><li class="nav-item" data-v-0ad04a24><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-parameters" data-v-0ad04a24>Parameters</button></li><li class="nav-item" data-v-0ad04a24><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#page-session" data-v-0ad04a24>Session</button></li>', 3);
+const _hoisted_32 = { class: "tab-content mb-5" };
 const _hoisted_33 = {
   class: "tab-pane show active",
   id: "page-summary"
@@ -2815,9 +3269,10 @@ const _hoisted_64 = {
   id: "page-session"
 };
 popScopeId();
-const _sfc_render$6 = /* @__PURE__ */ _withId$6((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$7 = /* @__PURE__ */ _withId$6((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_faicon = resolveComponent("faicon");
   const _component_router_link = resolveComponent("router-link");
+  const _component_Comments = resolveComponent("Comments");
   return openBlock(), createBlock(Fragment, null, [
     createVNode("div", _hoisted_1$6, [
       createVNode("div", _hoisted_2$5, [
@@ -3125,11 +3580,16 @@ const _sfc_render$6 = /* @__PURE__ */ _withId$6((_ctx, _cache, $props, $setup, $
           textContent: toDisplayString($data.notice.Session)
         }, null, 8, ["textContent"])
       ])
-    ])
+    ]),
+    createVNode(_component_Comments, {
+      commentsResponse: $data.commentsResponse,
+      appId: $data.app.Id,
+      problemId: $data.problem.Id
+    }, null, 8, ["commentsResponse", "appId", "problemId"])
   ], 64);
 });
-_sfc_main$7.render = _sfc_render$6;
-_sfc_main$7.__scopeId = "data-v-7443bda1";
+_sfc_main$7.render = _sfc_render$7;
+_sfc_main$7.__scopeId = "data-v-0ad04a24";
 var index_vue_vue_type_style_index_0_scoped_true_lang$1 = "";
 const _sfc_main$6 = {
   data() {
@@ -3140,8 +3600,8 @@ const _sfc_main$6 = {
     };
   },
   components: {
-    Pagination: _sfc_main$m,
-    SortButton: _sfc_main$l
+    Pagination: _sfc_main$o,
+    SortButton: _sfc_main$n
   },
   computed: {
     isSearch() {
@@ -3209,7 +3669,7 @@ const _hoisted_19 = {
 };
 const _hoisted_20 = /* @__PURE__ */ createTextVNode(" Admin ");
 popScopeId();
-const _sfc_render$5 = /* @__PURE__ */ _withId$5((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$6 = /* @__PURE__ */ _withId$5((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_router_link = resolveComponent("router-link");
   const _component_SortButton = resolveComponent("SortButton");
   const _component_faicon = resolveComponent("faicon");
@@ -3339,7 +3799,7 @@ const _sfc_render$5 = /* @__PURE__ */ _withId$5((_ctx, _cache, $props, $setup, $
     ], 64))
   ], 64);
 });
-_sfc_main$6.render = _sfc_render$5;
+_sfc_main$6.render = _sfc_render$6;
 _sfc_main$6.__scopeId = "data-v-595676d5";
 var form_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _sfc_main$5 = {
@@ -3438,7 +3898,7 @@ const _hoisted_16 = /* @__PURE__ */ createVNode("span", null, "Admin", -1);
 const _hoisted_17 = { class: "mb-3 row" };
 const _hoisted_18 = { class: "col-sm-10 offset-sm-2" };
 popScopeId();
-const _sfc_render$4 = /* @__PURE__ */ _withId$4((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$5 = /* @__PURE__ */ _withId$4((_ctx, _cache, $props, $setup, $data, $options) => {
   return openBlock(), createBlock("form", {
     onSubmit: _cache[4] || (_cache[4] = withModifiers((...args) => $options.submit && $options.submit(...args), ["prevent"]))
   }, [
@@ -3505,7 +3965,7 @@ const _sfc_render$4 = /* @__PURE__ */ _withId$4((_ctx, _cache, $props, $setup, $
     ])
   ], 32);
 });
-_sfc_main$5.render = _sfc_render$4;
+_sfc_main$5.render = _sfc_render$5;
 _sfc_main$5.__scopeId = "data-v-1e4e1652";
 var new_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _sfc_main$4 = {
@@ -3537,7 +3997,7 @@ const _hoisted_1$3 = /* @__PURE__ */ createVNode("div", { class: "mb-3 border-bo
   /* @__PURE__ */ createVNode("h1", { class: "h3" }, "Add User")
 ], -1);
 popScopeId();
-const _sfc_render$3 = /* @__PURE__ */ _withId$3((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$4 = /* @__PURE__ */ _withId$3((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Form = resolveComponent("Form");
   return openBlock(), createBlock(Fragment, null, [
     _hoisted_1$3,
@@ -3548,7 +4008,7 @@ const _sfc_render$3 = /* @__PURE__ */ _withId$3((_ctx, _cache, $props, $setup, $
     }, null, 8, ["obj"])
   ], 64);
 });
-_sfc_main$4.render = _sfc_render$3;
+_sfc_main$4.render = _sfc_render$4;
 _sfc_main$4.__scopeId = "data-v-127dfabe";
 var edit_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _sfc_main$3 = {
@@ -3633,7 +4093,7 @@ const _hoisted_10$1 = /* @__PURE__ */ createVNode("div", { class: "text-muted mt
   /* @__PURE__ */ createVNode("small", null, "Delete user will also delete all user's sessions")
 ], -1);
 popScopeId();
-const _sfc_render$2 = /* @__PURE__ */ _withId$2((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$3 = /* @__PURE__ */ _withId$2((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_Form = resolveComponent("Form");
   return openBlock(), createBlock(Fragment, null, [
     _hoisted_1$2,
@@ -3679,7 +4139,7 @@ const _sfc_render$2 = /* @__PURE__ */ _withId$2((_ctx, _cache, $props, $setup, $
     ])
   ], 64);
 });
-_sfc_main$3.render = _sfc_render$2;
+_sfc_main$3.render = _sfc_render$3;
 _sfc_main$3.__scopeId = "data-v-131d1084";
 var _imports_0 = "/android-chrome-512x512.png";
 var signIn_vue_vue_type_style_index_0_scoped_true_lang = "";
@@ -3744,7 +4204,7 @@ const _hoisted_6$1 = /* @__PURE__ */ createVNode("label", null, "Password", -1);
 const _hoisted_7$1 = { class: "checkbox mb-3" };
 const _hoisted_8$1 = /* @__PURE__ */ createTextVNode(" Remember me ");
 popScopeId();
-const _sfc_render$1 = /* @__PURE__ */ _withId$1((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$2 = /* @__PURE__ */ _withId$1((_ctx, _cache, $props, $setup, $data, $options) => {
   return openBlock(), createBlock("form", {
     onSubmit: _cache[4] || (_cache[4] = withModifiers((...args) => $options.signIn && $options.signIn(...args), ["prevent"]))
   }, [
@@ -3790,7 +4250,7 @@ const _sfc_render$1 = /* @__PURE__ */ _withId$1((_ctx, _cache, $props, $setup, $
     }, "Sign in", 8, ["disabled"])
   ], 32);
 });
-_sfc_main$2.render = _sfc_render$1;
+_sfc_main$2.render = _sfc_render$2;
 _sfc_main$2.__scopeId = "data-v-2ae5d04a";
 var index_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _sfc_main$1 = {
@@ -3834,7 +4294,7 @@ const _hoisted_9 = /* @__PURE__ */ createVNode("h5", null, "You do not have perm
 const _hoisted_10 = /* @__PURE__ */ createVNode("h3", null, "500", -1);
 const _hoisted_11 = /* @__PURE__ */ createVNode("h5", null, "Server error, unable to process request. Please try again later.", -1);
 popScopeId();
-const _sfc_render = /* @__PURE__ */ _withId((_ctx, _cache, $props, $setup, $data, $options) => {
+const _sfc_render$1 = /* @__PURE__ */ _withId((_ctx, _cache, $props, $setup, $data, $options) => {
   const _component_router_link = resolveComponent("router-link");
   return openBlock(), createBlock("div", _hoisted_1, [
     createVNode("div", _hoisted_2, [
@@ -3863,13 +4323,19 @@ const _sfc_render = /* @__PURE__ */ _withId((_ctx, _cache, $props, $setup, $data
     ])
   ]);
 });
-_sfc_main$1.render = _sfc_render;
+_sfc_main$1.render = _sfc_render$1;
 _sfc_main$1.__scopeId = "data-v-369a4d5c";
 const _sfc_main = {};
+function _sfc_render(_ctx, _cache) {
+  return null;
+}
+_sfc_main.render = _sfc_render;
 NProgress.configure({ showSpinner: false });
 const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
+    if (to.hash) {
+      return { el: to.hash };
+    } else if (savedPosition) {
       return savedPosition;
     } else {
       return { top: 0 };
@@ -3877,11 +4343,11 @@ const router = createRouter({
   },
   history: createWebHistory(),
   routes: [
-    { path: "/", name: "RouteHome", component: _sfc_main$k, alias: ["/apps"] },
-    { path: "/apps/new", name: "RouteAppsNew", component: _sfc_main$e },
-    { path: "/apps/:id", name: "RouteAppsShow", component: _sfc_main$h },
-    { path: "/apps/:id/edit", name: "RouteAppsEdit", component: _sfc_main$c },
-    { path: "/apps/:id/notifications", name: "RouteAppsNotifications", component: _sfc_main$9 },
+    { path: "/", name: "RouteHome", component: _sfc_main$m, alias: ["/apps"] },
+    { path: "/apps/new", name: "RouteAppsNew", component: _sfc_main$g },
+    { path: "/apps/:id", name: "RouteAppsShow", component: _sfc_main$j },
+    { path: "/apps/:id/edit", name: "RouteAppsEdit", component: _sfc_main$e },
+    { path: "/apps/:id/notifications", name: "RouteAppsNotifications", component: _sfc_main$b },
     {
       path: "/apps/:id/problems/:pid/notices/:nid",
       name: "RouteNoticesShow",
@@ -3892,7 +4358,7 @@ const router = createRouter({
       name: "RouteProblemsShow",
       component: _sfc_main$7
     },
-    { path: "/errors", name: "RouteProblems", component: _sfc_main$8 },
+    { path: "/errors", name: "RouteProblems", component: _sfc_main$a },
     { path: "/users", name: "RouteUsers", component: _sfc_main$6 },
     { path: "/users/new", name: "RouteUsersNew", component: _sfc_main$4 },
     { path: "/users/:id/edit", name: "RouteUsersEdit", component: _sfc_main$3 },
@@ -4000,7 +4466,8 @@ var validations = {
   string_uniqueness: (p) => `already exists`,
   string_required: (p) => `must not be blank`,
   string_wrong: (p) => `wrong name or password`,
-  string_deleted: (p) => `user has been deleted`
+  string_deleted: (p) => `user has been deleted`,
+  string_duplicate: (p) => `duplicate content`
 };
 var en_US = /* @__PURE__ */ Object.freeze({
   __proto__: null,
@@ -4137,8 +4604,8 @@ var utils = {
     }
   }
 };
-library.add(faThumbsUp, faCheckCircle, faCheck, faTimes, faCrown, faCaretUp, faCaretDown);
-const app = createApp(_sfc_main$n);
+library.add(faThumbsUp, faCheckCircle, faCheck, faTimes, faCrown, faCaretUp, faCaretDown, faTrashAlt, faEdit);
+const app = createApp(_sfc_main$p);
 app.use(router);
 app.use(VueToastificationPlugin).mixin({ methods: { $toast: useToast } });
 app.mixin(i18n);

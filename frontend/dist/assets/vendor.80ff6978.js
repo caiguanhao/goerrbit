@@ -5106,6 +5106,26 @@ const withModifiers = (fn2, modifiers) => {
     return fn2(event, ...args);
   };
 };
+const keyNames = {
+  esc: "escape",
+  space: " ",
+  up: "arrow-up",
+  left: "arrow-left",
+  right: "arrow-right",
+  down: "arrow-down",
+  delete: "backspace"
+};
+const withKeys = (fn2, modifiers) => {
+  return (event) => {
+    if (!("key" in event))
+      return;
+    const eventKey = hyphenate(event.key);
+    if (!modifiers.some((k) => k === eventKey || keyNames[k] === eventKey)) {
+      return;
+    }
+    return fn2(event);
+  };
+};
 const rendererOptions = extend$1({ patchProp, forcePatchProp }, nodeOps);
 let renderer;
 function ensureRenderer() {
@@ -14554,6 +14574,11 @@ var faCrown = {
   iconName: "crown",
   icon: [640, 512, [], "f521", "M528 448H112c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h416c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm64-320c-26.5 0-48 21.5-48 48 0 7.1 1.6 13.7 4.4 19.8L476 239.2c-15.4 9.2-35.3 4-44.2-11.6L350.3 85C361 76.2 368 63 368 48c0-26.5-21.5-48-48-48s-48 21.5-48 48c0 15 7 28.2 17.7 37l-81.5 142.6c-8.9 15.6-28.9 20.8-44.2 11.6l-72.3-43.4c2.7-6 4.4-12.7 4.4-19.8 0-26.5-21.5-48-48-48S0 149.5 0 176s21.5 48 48 48c2.6 0 5.2-.4 7.7-.8L128 416h384l72.3-192.8c2.5.4 5.1.8 7.7.8 26.5 0 48-21.5 48-48s-21.5-48-48-48z"]
 };
+var faEdit = {
+  prefix: "fas",
+  iconName: "edit",
+  icon: [576, 512, [], "f044", "M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"]
+};
 var faThumbsUp = {
   prefix: "fas",
   iconName: "thumbs-up",
@@ -14563,6 +14588,11 @@ var faTimes = {
   prefix: "fas",
   iconName: "times",
   icon: [352, 512, [], "f00d", "M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"]
+};
+var faTrashAlt = {
+  prefix: "fas",
+  iconName: "trash-alt",
+  icon: [448, 512, [], "f2ed", "M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z"]
 };
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function createCommonjsModule(fn2, module) {
@@ -14996,4 +15026,4 @@ defineComponent({
     };
   }
 });
-export { createStaticVNode as A, createRouter as B, createWebHistory as C, library as D, faThumbsUp as E, Fragment as F, faCheckCircle as G, faCheck as H, faTimes as I, faCrown as J, faCaretUp as K, faCaretDown as L, Modal as M, NProgress as N, createApp as O, FontAwesomeIcon as P, VueToastificationPlugin as V, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, createTextVNode as f, renderList as g, renderSlot as h, popScopeId as i, withDirectives as j, withScopeId as k, reactive as l, watch as m, format as n, openBlock as o, pushScopeId as p, vModelCheckbox as q, resolveComponent as r, vModelRadio as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, vModelSelect as x, vModelDynamic as y, resolveDirective as z };
+export { resolveDirective as A, TransitionGroup as B, withKeys as C, createStaticVNode as D, createRouter as E, Fragment as F, createWebHistory as G, library as H, faThumbsUp as I, faCheckCircle as J, faCheck as K, faTimes as L, Modal as M, NProgress as N, faCrown as O, Popover as P, faCaretUp as Q, faCaretDown as R, faTrashAlt as S, Tooltip as T, faEdit as U, createApp as V, VueToastificationPlugin as W, FontAwesomeIcon as X, axios as a, createVNode as b, createBlock as c, withModifiers as d, createCommentVNode as e, resolveComponent as f, createTextVNode as g, renderList as h, renderSlot as i, popScopeId as j, withDirectives as k, withScopeId as l, reactive as m, watch as n, openBlock as o, pushScopeId as p, format as q, ref as r, vModelCheckbox as s, toDisplayString as t, useToast as u, vModelText as v, withCtx as w, vModelRadio as x, vModelSelect as y, vModelDynamic as z };
