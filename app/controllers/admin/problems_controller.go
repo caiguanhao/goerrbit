@@ -86,9 +86,11 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 	c.(Ctx).ModelProblem.Find(append([]interface{}{sql}, args...)...).MustQuery(&problems)
 	p := []serializers.AdminProblem{}
 	appIds := []int{}
+	problemIds := []int{}
 	for _, problem := range problems {
 		p = append(p, serializers.NewAdminProblem(problem))
 		appIds = appendIfMissing(appIds, problem.AppId)
+		problemIds = append(problemIds, problem.Id)
 	}
 	a := []serializers.AdminAppSimple{}
 	if includeApps && len(appIds) > 0 {
@@ -98,11 +100,27 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 			a = append(a, serializers.NewAdminAppSimple(app))
 		}
 	}
+
+	comments := []struct {
+		ProblemId int
+		UserName  *string
+		Body      string
+	}{}
+	if len(problemIds) > 0 {
+		c.(Ctx).Model.NewSQLWithValues(
+			"SELECT DISTINCT ON (problem_id) problem_id, users.name, SUBSTRING(body, 0, 100) FROM comments "+
+				"LEFT JOIN users ON users.id = comments.user_id "+
+				"WHERE problem_id = ANY($1) ORDER BY problem_id, comments.created_at ASC",
+			problemIds,
+		).MustQuery(&comments)
+	}
+
 	return c.JSON(200, struct {
 		Problems   []serializers.AdminProblem
 		Apps       []serializers.AdminAppSimple
+		Comments   interface{}
 		Pagination pagination.PaginationQuerySortResult
-	}{p, a, q.PaginationQuerySortResult(count)})
+	}{p, a, comments, q.PaginationQuerySortResult(count)})
 }
 
 func (ctrl problemsCtrl) show(c echo.Context) error {

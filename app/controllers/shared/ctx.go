@@ -23,6 +23,7 @@ type (
 	}
 
 	CtxModels struct {
+		Model                    *psql.Model
 		ModelApp                 *psql.Model
 		ModelProblem             *psql.Model
 		ModelNotice              *psql.Model
@@ -35,6 +36,7 @@ type (
 
 func NewCtxModels(options ...interface{}) CtxModels {
 	return CtxModels{
+		Model:                    psql.NewModelTable("", options...),
 		ModelApp:                 psql.NewModel(models.App{}, options...),
 		ModelProblem:             psql.NewModel(models.Problem{}, options...),
 		ModelNotice:              psql.NewModel(models.Notice{}, options...),
