@@ -17,6 +17,7 @@ func init() {
 func (c commentsCtrl) init(g *echo.Group) {
 	g.GET("/apps/:app_id/problems/:problem_id/comments", c.list)
 	g.POST("/apps/:app_id/problems/:problem_id/comments", c.create)
+	g.PUT("/apps/:app_id/problems/:problem_id/comments/:id", c.update)
 	g.DELETE("/apps/:app_id/problems/:problem_id/comments/:id", c.destroy, UserMustBeAdmin)
 }
 
@@ -91,6 +92,22 @@ func (ctrl commentsCtrl) create(c echo.Context) error {
 	var id int
 	m.Insert(changes...)("RETURNING id").MustQueryRow(&id)
 	m.Find("WHERE id = $1", id).MustQuery(&comment)
+	return c.NoContent(204)
+}
+
+func (ctrl commentsCtrl) update(c echo.Context) error {
+	_, problemId := ctrl.findProblem(c)
+	var comment models.Comment
+	m := c.(Ctx).ModelComment
+	m.Find("WHERE problem_id = $1 AND id = $2 AND user_id = $3",
+		problemId, c.Param("id"), c.(Ctx).CurrentUser().Id).MustQuery(&comment)
+	changes := m.MustAssign(
+		&comment,
+		m.Permit(ctrl.params()...).Filter(c.Request().Body),
+		m.UpdatedAt(),
+	)
+	c.(Ctx).MustValidate(comment)
+	m.Update(changes...)("WHERE id = $1", comment.Id).MustExecute()
 	return c.NoContent(204)
 }
 
