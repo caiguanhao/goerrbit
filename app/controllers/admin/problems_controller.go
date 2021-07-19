@@ -276,16 +276,19 @@ func (problemsCtrl) destroy(c echo.Context) error {
 	}
 	c.Bind(&req)
 	var noticesDeleted int
+	var commentsDeleted int
 	ids := []int{}
 	if len(req.Ids) > 0 {
 		c.(Ctx).ModelNotice.Delete("WHERE problem_id = ANY($1)", req.Ids).MustExecute(&noticesDeleted)
+		c.(Ctx).ModelComment.Delete("WHERE problem_id = ANY($1)", req.Ids).MustExecute(&commentsDeleted)
 		c.(Ctx).ModelProblem.Delete("WHERE id = ANY($1) RETURNING id", req.Ids).MustQuery(&ids)
 	}
 	return c.JSON(200, struct {
 		Deleted         []int
 		ProblemsDeleted int
 		NoticesDeleted  int
-	}{ids, len(ids), noticesDeleted})
+		CommentsDeleted int
+	}{ids, len(ids), noticesDeleted, commentsDeleted})
 }
 
 func (_ problemsCtrl) findApp(c echo.Context) (app models.App) {
