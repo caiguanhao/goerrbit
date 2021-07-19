@@ -48,6 +48,12 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 	}
 	c.Bind(&q)
 
+	var searchInComments bool
+	if strings.Contains(q.Query.Query, "in:comments") {
+		searchInComments = true
+		q.Query.Query = strings.TrimSpace(strings.ReplaceAll(q.Query.Query, "in:comments", ""))
+	}
+
 	var includeApps bool
 	var cond []string
 	var args []interface{}
@@ -59,7 +65,11 @@ func (ctrl problemsCtrl) list(c echo.Context) error {
 		args = append(args, app.Id)
 	}
 	if pattern := q.GetLikePattern(); pattern != "" {
-		cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
+		if searchInComments {
+			cond = append(cond, "id IN (SELECT DISTINCT problem_id FROM comments WHERE body ILIKE $?)")
+		} else {
+			cond = append(cond, "(message ILIKE $? OR error_class ILIKE $? OR location ILIKE $?)")
+		}
 		args = append(args, pattern)
 	}
 	if env := c.QueryParam("environment"); env != "" {
