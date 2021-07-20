@@ -114,7 +114,7 @@ func (main Main) Run() {
 	}).NewEchoServer()
 
 	if *toPrintRoutes {
-		printRoutes(e.Routes())
+		printRoutes(e)
 		return
 	}
 
@@ -196,8 +196,13 @@ func (a ByRouteName) Len() int           { return len(a) }
 func (a ByRouteName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByRouteName) Less(i, j int) bool { return a[i][2] < a[j][2] }
 
-func printRoutes(routes []*echo.Route) {
-	cols := []int{1, 1, 1}
+func printRoutes(e *echo.Echo) {
+	routes := e.Routes()
+	cols := []int{}
+	header := []string{"METHOD", "PATH", "NAME"}
+	for i := range header {
+		cols = append(cols, len(header[i]))
+	}
 	data := [][]string{}
 	for _, route := range routes {
 		i := strings.LastIndex(route.Name, "/")
@@ -214,9 +219,17 @@ func printRoutes(routes []*echo.Route) {
 		data = append(data, row)
 	}
 	sort.Sort(ByRouteName(data))
-	format := fmt.Sprintf("%%-%ds  %%-%ds  %%-%ds\n", cols[0], cols[1], cols[2])
-	fmt.Printf(format, "METHOD", "PATH", "NAME")
-	for i := range data {
-		fmt.Printf(format, data[i][0], data[i][1], data[i][2])
+	formats := []string{}
+	for _, n := range cols {
+		formats = append(formats, fmt.Sprintf("%%-%ds", n))
+	}
+	format := strings.Join(formats, "  ") + "\n"
+	data = append([][]string{header}, data...)
+	for _, line := range data {
+		l := []interface{}{}
+		for _, c := range line {
+			l = append(l, c)
+		}
+		fmt.Printf(format, l...)
 	}
 }
